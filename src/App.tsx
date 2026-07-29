@@ -13,6 +13,7 @@ import Onboarding from '@/pages/Onboarding'
 import Register from '@/pages/Register'
 import Settings from '@/pages/Settings'
 import Tasks from '@/pages/Tasks'
+import Workbook from '@/pages/Workbook'
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/kanban" element={<Kanban />} />
         <Route path="/notes" element={<Notes />} />
+        <Route path="/workbook" element={<Workbook />} />
         <Route path="/focus-timer" element={<FocusTimer />} />
         <Route path="/clock" element={<Clock />} />
         <Route path="/insights" element={<Insights />} />

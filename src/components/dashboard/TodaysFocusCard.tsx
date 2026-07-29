@@ -20,7 +20,9 @@ function TodaysFocusCard() {
   return (
     <GlassCard className="space-y-4 p-5">
       <div className="flex items-center justify-between">
-        <h2 className="font-heading text-base font-semibold text-ink">Today&apos;s Focus</h2>
+        <h2 className="font-heading text-base font-semibold text-ink">
+          Today&apos;s Focus
+        </h2>
         <span className="font-mono text-xs text-ink-secondary">
           {doneCount} / {tasks.length} done
         </span>
@@ -29,15 +31,20 @@ function TodaysFocusCard() {
       {isLoading ? (
         <p className="text-sm text-ink-secondary">Loading tasks...</p>
       ) : visibleTasks.length === 0 ? (
-        <p className="text-sm text-ink-secondary">No tasks yet. Add your first one below.</p>
+        <p className="text-sm text-ink-secondary">
+          No tasks yet. Add your first one below.
+        </p>
       ) : (
         <ul className="space-y-2">
           {visibleTasks.map((task) => (
-            <li key={task.$id} className="flex items-center justify-between gap-3 rounded-control px-1 py-1.5">
+            <li
+              key={task.$id}
+              className="flex items-center gap-3 rounded-control px-1 py-1.5"
+            >
               <button
                 type="button"
                 onClick={() => toggleTask(task.$id, task.status)}
-                className="flex flex-1 items-center gap-3 text-left"
+                className="flex min-w-0 flex-1 items-center gap-3 text-left"
               >
                 <span
                   className={cn(
@@ -45,18 +52,25 @@ function TodaysFocusCard() {
                     task.status === 'done' && 'border-success bg-success/20 text-success',
                   )}
                 >
-                  {task.status === 'done' ? <Check className="h-3 w-3" strokeWidth={3} /> : null}
+                  {task.status === 'done' ? (
+                    <Check className="h-3 w-3" strokeWidth={3} />
+                  ) : null}
                 </span>
                 <span
                   className={cn(
-                    'truncate text-sm text-ink-secondary',
+                    'min-w-0 truncate text-sm text-ink-secondary',
                     task.status === 'done' && 'text-ink line-through',
                   )}
                 >
                   {task.title}
                 </span>
               </button>
-              <Badge variant={CATEGORY_VARIANT[task.category] ?? 'default'}>{task.category}</Badge>
+              <Badge
+                variant={CATEGORY_VARIANT[task.category] ?? 'default'}
+                className="shrink-0"
+              >
+                {task.category}
+              </Badge>
             </li>
           ))}
         </ul>
@@ -74,4 +88,3 @@ function TodaysFocusCard() {
 }
 
 export { TodaysFocusCard }
-

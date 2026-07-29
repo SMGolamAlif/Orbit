@@ -17,7 +17,9 @@ function formatNoteDate(iso: string) {
 function QuickNotesCard() {
   const { notes, isLoading } = useNotes()
 
-  const preview = [...notes].sort((a, b) => Number(b.pinned) - Number(a.pinned)).slice(0, 3)
+  const preview = [...notes]
+    .sort((a, b) => Number(b.pinned) - Number(a.pinned))
+    .slice(0, 3)
 
   return (
     <GlassCard className="space-y-4 p-5">
@@ -49,11 +51,17 @@ function QuickNotesCard() {
                 to="/notes"
                 className="block rounded-control border border-glass-border bg-tint/5 p-3 transition-colors hover:border-primary"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <p className="truncate text-sm font-medium text-ink">{note.title}</p>
-                  <span className="shrink-0 text-[11px] text-muted">{formatNoteDate(note.$createdAt)}</span>
+                <div className="flex items-center gap-2">
+                  <p className="min-w-0 truncate text-sm font-medium text-ink">
+                    {note.title}
+                  </p>
+                  <span className="shrink-0 text-[11px] text-muted">
+                    {formatNoteDate(note.$createdAt)}
+                  </span>
                 </div>
-                <p className="mt-1 truncate text-xs text-ink-secondary">{note.content || 'No content yet'}</p>
+                <p className="mt-1 truncate text-xs text-ink-secondary">
+                  {note.content || 'No content yet'}
+                </p>
               </Link>
             </li>
           ))}

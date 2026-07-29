@@ -13,6 +13,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { client } from './config/appwrite'
 import { AccentProvider } from './context/AccentContext'
+import { AlarmProvider } from './context/AlarmContext'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import './index.css'
@@ -33,13 +34,15 @@ createRoot(rootElement).render(
   <StrictMode>
     <ThemeProvider>
       <AccentProvider>
-        <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            <AuthProvider>
-              <App />
-            </AuthProvider>
-          </BrowserRouter>
-        </QueryClientProvider>
+        <AlarmProvider>
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              <AuthProvider>
+                <App />
+              </AuthProvider>
+            </BrowserRouter>
+          </QueryClientProvider>
+        </AlarmProvider>
       </AccentProvider>
     </ThemeProvider>
   </StrictMode>,

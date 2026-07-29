@@ -57,12 +57,10 @@ export default {
         200: '200ms',
       },
       boxShadow: {
-        glow: '0 0 32px rgba(53, 217, 255, 0.18)',
+        glow: '0 0 32px rgb(var(--color-primary) / 0.18)',
         glass: 'var(--shadow-glass)',
       },
     },
   },
   plugins: [],
 }
-
-

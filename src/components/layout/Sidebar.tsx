@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   CalendarRange,
   CheckSquare,
   Clock,
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
   { to: '/tasks', label: 'Tasks', icon: CheckSquare, end: false },
   { to: '/kanban', label: 'Kanban', icon: Kanban, end: false },
   { to: '/notes', label: 'Notes', icon: NotebookPen, end: false },
+  { to: '/workbook', label: 'Workbook', icon: BookOpen, end: false },
   { to: '/focus-timer', label: 'Focus Timer', icon: Timer, end: false },
   { to: '/clock', label: 'Clock', icon: Clock, end: false },
   { to: '/insights', label: 'Insights', icon: LineChart, end: false },
@@ -61,13 +63,19 @@ function Sidebar({ progressPercent, weeksLived }: SidebarProps) {
       </nav>
 
       <GlassCard className="space-y-3 p-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-ink-secondary">Life Progress</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-ink-secondary">
+          Life Progress
+        </p>
         <div className="flex items-center gap-3">
           <ProgressRing progress={progressPercent} size={56} strokeWidth={6}>
-            <span className="font-mono text-sm font-semibold text-ink">{progressPercent}%</span>
+            <span className="font-mono text-sm font-semibold text-ink">
+              {progressPercent}%
+            </span>
           </ProgressRing>
           <div className="text-xs text-ink-secondary">
-            <p className="font-mono text-sm font-semibold text-ink">{weeksLived.toLocaleString()}</p>
+            <p className="font-mono text-sm font-semibold text-ink">
+              {weeksLived.toLocaleString()}
+            </p>
             <p>weeks lived</p>
           </div>
         </div>
