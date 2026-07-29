@@ -1,13 +1,36 @@
-# Time Starter: React + Appwrite + Tailwind
+# Orbit — Own Your Time
 
-Starter project with:
+<p align="center">
+  <img src="src/assets/Screenshot.png" alt="Orbit Dashboard Screenshot" width="800" />
+</p>
 
-- React (Vite)
-- Tailwind CSS
-- Appwrite client integration
-- Auth scaffold (login/register/logout)
-- Protected route example
-- ESLint + Prettier
+**Orbit** is a personal time-management and life-tracking dashboard built with React, TypeScript, and Appwrite. It helps you visualize your life in weeks, stay focused with a Pomodoro-style timer, manage tasks & notes, and gain insights into how you spend your most valuable resource — time.
+
+### ✨ Features
+
+- **Life Calendar** — See your entire life in weeks. A powerful, humbling visualization inspired by _Your Life in Weeks_.
+- **Focus Timer** — Built-in Pomodoro timer with session tracking to keep you in flow.
+- **Task Management** — Kanban board and list views for organizing your work.
+- **Quick Notes** — Jot down thoughts without leaving the dashboard.
+- **Weekly Overview** — At-a-glance summary of your week's progress.
+- **Insights** — Analytics and trends on your focus sessions and productivity.
+- **Dark/Light Themes** — Beautiful glassmorphism UI with accent color customization.
+- **Authentication** — Secure login, registration, and onboarding flow via Appwrite.
+
+### 🛠 Tech Stack
+
+| Layer         | Technology                         |
+| ------------- | ---------------------------------- |
+| Framework     | React 19 + TypeScript              |
+| Build Tool    | Vite                               |
+| Styling       | Tailwind CSS + Glassmorphism       |
+| Backend       | Appwrite (Auth, Database, Storage) |
+| Routing       | React Router v7                    |
+| Animations    | Framer Motion                      |
+| Icons         | Lucide React                       |
+| Data Fetching | TanStack React Query               |
+
+---
 
 ## 1) Install
 
@@ -44,23 +67,18 @@ npm run build
 
 ## Project Layout
 
-- `src/config/appwrite.js`: Appwrite client setup
-- `src/services/appwrite.js`: auth/database/storage helpers
-- `src/context/AuthContext.jsx`: app auth state
-- `src/components/ProtectedRoute.jsx`: route guard
-- `src/pages/*`: starter pages
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
+src/
+├── assets/              # Static assets (images, screenshots)
+├── components/
+│   ├── dashboard/      # Dashboard widget cards
+│   ├── layout/         # AppShell, Sidebar, Topbar, Footer
+│   └── ui/             # Reusable UI primitives (Button, GlassCard, etc.)
+├── config/             # Appwrite client configuration
+├── context/            # React contexts (Auth, Theme, Accent, FocusTimer)
+├── hooks/              # Custom hooks (useAuth, useTheme, useTasks, etc.)
+├── lib/                # Utility libraries (life calendar, focus sessions)
+├── pages/              # Route-level page components
+├── services/           # Appwrite service helpers (auth, notes, tasks, profile)
+└── types/              # TypeScript type definitions
+```
