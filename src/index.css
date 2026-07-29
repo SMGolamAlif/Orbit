@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root.dark {
+  color-scheme: dark;
+
+  --color-bg: 7 10 17;
+  --color-bg-soft: 15 18 32;
+  --color-surface: 16 19 27;
+  --color-surface-elevated: 23 28 39;
+  --color-glass: rgba(255, 255, 255, 0.05);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-tint: 255 255 255;
+  --color-primary: 53 217 255;
+  --color-primary-light: 36 200 255;
+  --color-secondary: 122 92 255;
+  --color-highlight: 158 94 255;
+  --color-success: 62 234 153;
+  --color-warning: 255 184 77;
+  --color-danger: 255 94 135;
+  --color-muted: 111 119 135;
+  --color-ink: 255 255 255;
+  --color-ink-secondary: 169 179 194;
+
+  --shadow-glass: 0 20px 60px rgba(0, 0, 0, 0.35);
+  --glow-top: rgb(var(--color-primary) / 0.06);
+  --glow-bottom: rgb(var(--color-secondary) / 0.08);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+}
+
+:root.light {
+  color-scheme: light;
+
+  --color-bg: 246 248 251;
+  --color-bg-soft: 238 242 248;
+  --color-surface: 255 255 255;
+  --color-surface-elevated: 255 255 255;
+  --color-glass: rgba(255, 255, 255, 0.72);
+  --color-glass-border: rgba(30, 41, 59, 0.08);
+  --color-tint: 16 24 40;
+  --color-primary: 36 200 255;
+  --color-primary-light: 53 217 255;
+  --color-secondary: 123 97 255;
+  --color-highlight: 168 85 247;
+  --color-success: 34 197 94;
+  --color-warning: 245 158 11;
+  --color-danger: 244 63 94;
+  --color-muted: 152 162 179;
+  --color-ink: 16 24 40;
+  --color-ink-secondary: 71 84 103;
+
+  --shadow-glass: 0 12px 32px rgba(15, 23, 42, 0.06);
+  --glow-top: rgb(var(--color-primary) / 0.07);
+  --glow-bottom: rgb(var(--color-highlight) / 0.06);
+  --scrollbar-thumb: rgba(15, 23, 42, 0.12);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  @apply bg-bg font-body text-ink antialiased transition-colors duration-200;
+  background-image:
+    radial-gradient(ellipse at top, var(--glow-top), transparent 60%),
+    radial-gradient(ellipse at bottom, var(--glow-bottom), transparent 60%);
+  background-attachment: fixed;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply font-heading;
+}
+
+::selection {
+  @apply bg-primary/30 text-ink;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 999px;
+}
+
