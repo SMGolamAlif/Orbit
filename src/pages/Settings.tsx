@@ -23,8 +23,15 @@ function Settings() {
   const [name, setName] = useState(user?.name ?? '')
   const [birthDate, setBirthDate] = useState(profile?.birthDate?.slice(0, 10) ?? '')
   const [country, setCountry] = useState(profile?.country ?? '')
-  const [lifeExpectancyYears, setLifeExpectancyYears] = useState(profile?.lifeExpectancyYears ?? 80)
-  const [timezone, setTimezone] = useState(profile?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone)
+  const [lifeExpectancyYears, setLifeExpectancyYears] = useState(
+    profile?.lifeExpectancyYears ?? 80,
+  )
+  const [timezone, setTimezone] = useState(
+    profile?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+  )
+  const [showMilliseconds, setShowMilliseconds] = useState(
+    profile?.showMilliseconds !== false,
+  )
 
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -37,12 +44,17 @@ function Settings() {
   }
 
   const [syncedProfileAt, setSyncedProfileAt] = useState(profile?.timezone)
+  const [syncedShowMs, setSyncedShowMs] = useState(profile?.showMilliseconds)
   if (profile && profile.timezone !== syncedProfileAt) {
     setSyncedProfileAt(profile.timezone)
     setBirthDate(profile.birthDate?.slice(0, 10) ?? '')
     setCountry(profile.country ?? '')
     setLifeExpectancyYears(profile.lifeExpectancyYears)
     setTimezone(profile.timezone)
+  }
+  if (profile && profile.showMilliseconds !== syncedShowMs) {
+    setSyncedShowMs(profile.showMilliseconds)
+    setShowMilliseconds(profile.showMilliseconds !== false)
   }
 
   function handleCountryChange(nextCountry: string) {
@@ -68,6 +80,7 @@ function Settings() {
         country: country || undefined,
         timezone,
         lifeExpectancyYears,
+        showMilliseconds,
       })
       await refreshProfile()
       setSaved(true)
@@ -131,7 +144,9 @@ function Settings() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm">
-              <span className="mb-1.5 block text-ink-secondary">Life expectancy (years)</span>
+              <span className="mb-1.5 block text-ink-secondary">
+                Life expectancy (years)
+              </span>
               <input
                 type="number"
                 min={1}
@@ -156,7 +171,9 @@ function Settings() {
           </div>
 
           {error ? (
-            <p className="rounded-control border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+            <p className="rounded-control border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
+              {error}
+            </p>
           ) : null}
 
           <div className="flex items-center gap-3">
@@ -179,9 +196,29 @@ function Settings() {
         <div className="flex items-center justify-between rounded-control border border-glass-border bg-tint/5 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-ink">Dark mode</p>
-            <p className="text-xs text-ink-secondary">Switch between dark and light themes.</p>
+            <p className="text-xs text-ink-secondary">
+              Switch between dark and light themes.
+            </p>
           </div>
-          <Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} ariaLabel="Toggle dark mode" />
+          <Switch
+            checked={theme === 'dark'}
+            onCheckedChange={toggleTheme}
+            ariaLabel="Toggle dark mode"
+          />
+        </div>
+
+        <div className="flex items-center justify-between rounded-control border border-glass-border bg-tint/5 px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-ink">Show milliseconds</p>
+            <p className="text-xs text-ink-secondary">
+              Display milliseconds on focus timer and clock.
+            </p>
+          </div>
+          <Switch
+            checked={showMilliseconds}
+            onCheckedChange={setShowMilliseconds}
+            ariaLabel="Toggle milliseconds display"
+          />
         </div>
 
         <div>
@@ -200,7 +237,9 @@ function Settings() {
                 )}
                 style={{ backgroundColor: preset.swatch }}
               >
-                {accentKey === preset.key ? <Check className="h-4 w-4 text-white drop-shadow" strokeWidth={3} /> : null}
+                {accentKey === preset.key ? (
+                  <Check className="h-4 w-4 text-white drop-shadow" strokeWidth={3} />
+                ) : null}
               </button>
             ))}
 
@@ -209,10 +248,15 @@ function Settings() {
                 'relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border-2 transition-transform hover:scale-105',
                 accentKey === 'custom' ? 'border-ink' : 'border-glass-border',
               )}
-              style={{ background: 'conic-gradient(from 0deg, #ff4d6d, #fbbf24, #34d399, #38bdf8, #a78bfa, #ff4d6d)' }}
+              style={{
+                background:
+                  'conic-gradient(from 0deg, #ff4d6d, #fbbf24, #34d399, #38bdf8, #a78bfa, #ff4d6d)',
+              }}
               title="Custom color"
             >
-              {accentKey === 'custom' ? <Check className="h-4 w-4 text-white drop-shadow" strokeWidth={3} /> : null}
+              {accentKey === 'custom' ? (
+                <Check className="h-4 w-4 text-white drop-shadow" strokeWidth={3} />
+              ) : null}
               <input
                 type="color"
                 value={customHex}
@@ -221,7 +265,9 @@ function Settings() {
               />
             </label>
           </div>
-          <p className="mt-2 text-xs text-ink-secondary">Pick a preset or use the custom picker to build your own theme.</p>
+          <p className="mt-2 text-xs text-ink-secondary">
+            Pick a preset or use the custom picker to build your own theme.
+          </p>
         </div>
       </GlassCard>
 

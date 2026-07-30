@@ -7,10 +7,12 @@ import { useFocusTimer } from '@/hooks/useFocusTimer'
 import { FOCUS_SESSION_EVENT, listFocusSessions } from '@/lib/focus-sessions'
 import { cn } from '@/lib/utils'
 
-function formatTime(totalSeconds: number) {
+function formatTime(totalSeconds: number, showMs = false, ms = 0) {
   const minutes = Math.floor(totalSeconds / 60)
   const seconds = totalSeconds % 60
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  const base = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  if (!showMs) return { main: base, ms: '' }
+  return { main: base, ms: `.${ms.toString().padStart(3, '0')}` }
 }
 
 function formatSessionTime(iso: string) {
@@ -69,10 +71,11 @@ function useAmbientNoise(enabled: boolean) {
 }
 
 function FocusTimer() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const {
     mode,
     secondsLeft,
+    milliseconds,
     running,
     focusMinutes,
     breakMinutes,
@@ -82,6 +85,8 @@ function FocusTimer() {
     setDurations,
     reset,
   } = useFocusTimer()
+
+  const showMs = profile?.showMilliseconds !== false
 
   const [ambientOn, setAmbientOn] = useState(false)
   const [historyKey, setHistoryKey] = useState(0)
@@ -103,7 +108,11 @@ function FocusTimer() {
   )
 
   const todayMinutes = sessions
-    .filter((session) => session.mode === 'focus' && new Date(session.completedAt).toDateString() === new Date().toDateString())
+    .filter(
+      (session) =>
+        session.mode === 'focus' &&
+        new Date(session.completedAt).toDateString() === new Date().toDateString(),
+    )
     .reduce((sum, session) => sum + session.durationMinutes, 0)
 
   const progress = ((totalSeconds - secondsLeft) / totalSeconds) * 100
@@ -115,14 +124,20 @@ function FocusTimer() {
           <button
             type="button"
             onClick={() => switchMode('focus')}
-            className={cn('rounded-[10px] px-5 py-2 text-ink-secondary transition-colors', mode === 'focus' && 'bg-tint/10 text-ink')}
+            className={cn(
+              'rounded-[10px] px-5 py-2 text-ink-secondary transition-colors',
+              mode === 'focus' && 'bg-tint/10 text-ink',
+            )}
           >
             Focus
           </button>
           <button
             type="button"
             onClick={() => switchMode('break')}
-            className={cn('rounded-[10px] px-5 py-2 text-ink-secondary transition-colors', mode === 'break' && 'bg-tint/10 text-ink')}
+            className={cn(
+              'rounded-[10px] px-5 py-2 text-ink-secondary transition-colors',
+              mode === 'break' && 'bg-tint/10 text-ink',
+            )}
           >
             Break
           </button>
@@ -130,9 +145,20 @@ function FocusTimer() {
 
         <ProgressRing progress={progress} size={260} strokeWidth={14}>
           <div className="text-center">
-            <p className="font-mono text-6xl font-semibold text-ink">{formatTime(secondsLeft)}</p>
-            <p className="mt-1 text-sm text-ink-secondary">
-              {running ? (mode === 'focus' ? 'Focusing...' : 'On a break...') : 'Ready when you are'}
+            <p className="font-mono text-4xl font-semibold leading-none text-ink">
+              {formatTime(secondsLeft, showMs, milliseconds).main}
+            </p>
+            {showMs && (
+              <p className="font-mono text-lg leading-none text-ink-secondary">
+                {formatTime(secondsLeft, showMs, milliseconds).ms}
+              </p>
+            )}
+            <p className="mt-1 text-xs text-ink-secondary">
+              {running
+                ? mode === 'focus'
+                  ? 'Focusing...'
+                  : 'On a break...'
+                : 'Ready when you are'}
             </p>
           </div>
         </ProgressRing>
@@ -152,7 +178,11 @@ function FocusTimer() {
             aria-label={running ? 'Pause focus timer' : 'Start focus timer'}
             className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-primary to-secondary text-white shadow-glow transition-transform hover:scale-105"
           >
-            {running ? <Pause className="h-7 w-7" strokeWidth={2} /> : <Play className="h-7 w-7 translate-x-0.5" strokeWidth={2} />}
+            {running ? (
+              <Pause className="h-7 w-7" strokeWidth={2} />
+            ) : (
+              <Play className="h-7 w-7 translate-x-0.5" strokeWidth={2} />
+            )}
           </button>
           <button
             type="button"
@@ -163,7 +193,11 @@ function FocusTimer() {
               ambientOn && 'border-primary text-primary',
             )}
           >
-            {ambientOn ? <Volume2 className="h-5 w-5" strokeWidth={2} /> : <VolumeX className="h-5 w-5" strokeWidth={2} />}
+            {ambientOn ? (
+              <Volume2 className="h-5 w-5" strokeWidth={2} />
+            ) : (
+              <VolumeX className="h-5 w-5" strokeWidth={2} />
+            )}
           </button>
         </div>
 
@@ -176,7 +210,9 @@ function FocusTimer() {
               max={180}
               value={focusMinutes}
               disabled={running}
-              onChange={(event) => setDurations(Math.max(1, Number(event.target.value)), breakMinutes)}
+              onChange={(event) =>
+                setDurations(Math.max(1, Number(event.target.value)), breakMinutes)
+              }
               className="rounded-control border border-glass-border bg-tint/5 px-3 py-2 text-ink outline-none focus:border-primary disabled:opacity-50"
             />
           </label>
@@ -188,7 +224,9 @@ function FocusTimer() {
               max={60}
               value={breakMinutes}
               disabled={running}
-              onChange={(event) => setDurations(focusMinutes, Math.max(1, Number(event.target.value)))}
+              onChange={(event) =>
+                setDurations(focusMinutes, Math.max(1, Number(event.target.value)))
+              }
               className="rounded-control border border-glass-border bg-tint/5 px-3 py-2 text-ink outline-none focus:border-primary disabled:opacity-50"
             />
           </label>
@@ -207,7 +245,9 @@ function FocusTimer() {
         <GlassCard className="space-y-3 p-5">
           <h2 className="font-heading text-sm font-semibold text-ink">Session History</h2>
           {sessions.length === 0 ? (
-            <p className="text-sm text-ink-secondary">No sessions yet. Start your first focus session!</p>
+            <p className="text-sm text-ink-secondary">
+              No sessions yet. Start your first focus session!
+            </p>
           ) : (
             <ul className="max-h-80 space-y-2 overflow-y-auto pr-1">
               {sessions.slice(0, 20).map((session) => (
@@ -215,11 +255,18 @@ function FocusTimer() {
                   key={session.id}
                   className="flex items-center justify-between gap-2 rounded-control border border-glass-border bg-tint/5 px-3 py-2 text-sm"
                 >
-                  <span className={cn('font-medium', session.mode === 'focus' ? 'text-primary' : 'text-ink-secondary')}>
+                  <span
+                    className={cn(
+                      'font-medium',
+                      session.mode === 'focus' ? 'text-primary' : 'text-ink-secondary',
+                    )}
+                  >
                     {session.mode === 'focus' ? 'Focus' : 'Break'}
                   </span>
                   <span className="text-ink-secondary">{session.durationMinutes}m</span>
-                  <span className="text-xs text-muted">{formatSessionTime(session.completedAt)}</span>
+                  <span className="text-xs text-muted">
+                    {formatSessionTime(session.completedAt)}
+                  </span>
                 </li>
               ))}
             </ul>

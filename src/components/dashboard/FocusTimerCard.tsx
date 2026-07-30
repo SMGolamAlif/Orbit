@@ -1,17 +1,31 @@
 import { Pause, Play } from 'lucide-react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { ProgressRing } from '@/components/ui/progress-ring'
+import { useAuth } from '@/hooks/useAuth'
 import { useFocusTimer } from '@/hooks/useFocusTimer'
 import { cn } from '@/lib/utils'
 
-function formatTime(totalSeconds: number) {
+function formatTime(totalSeconds: number, showMs = false, ms = 0) {
   const minutes = Math.floor(totalSeconds / 60)
   const seconds = totalSeconds % 60
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  const base = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  if (!showMs) return { main: base, ms: '' }
+  return { main: base, ms: `.${ms.toString().padStart(3, '0')}` }
 }
 
 function FocusTimerCard() {
-  const { mode, secondsLeft, running, totalSeconds, toggleRunning, switchMode } = useFocusTimer()
+  const { profile } = useAuth()
+  const {
+    mode,
+    secondsLeft,
+    milliseconds,
+    running,
+    totalSeconds,
+    toggleRunning,
+    switchMode,
+  } = useFocusTimer()
+
+  const showMs = profile?.showMilliseconds !== false
 
   const progress = ((totalSeconds - secondsLeft) / totalSeconds) * 100
 
@@ -42,8 +56,17 @@ function FocusTimerCard() {
 
       <ProgressRing progress={progress} size={180} strokeWidth={10}>
         <div className="text-center">
-          <p className="font-mono text-4xl font-semibold text-ink">{formatTime(secondsLeft)}</p>
-          <p className="text-xs text-ink-secondary">{running ? 'Focusing...' : 'Start focusing'}</p>
+          <p className="font-mono text-2xl font-semibold leading-none text-ink">
+            {formatTime(secondsLeft, showMs, milliseconds).main}
+          </p>
+          {showMs && (
+            <p className="font-mono text-sm leading-none text-ink-secondary">
+              {formatTime(secondsLeft, showMs, milliseconds).ms}
+            </p>
+          )}
+          <p className="mt-0.5 text-xs text-ink-secondary">
+            {running ? 'Focusing...' : 'Start focusing'}
+          </p>
         </div>
       </ProgressRing>
 

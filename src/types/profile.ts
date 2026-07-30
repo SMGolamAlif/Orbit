@@ -3,6 +3,7 @@ interface UserProfile {
   country?: string
   timezone: string
   lifeExpectancyYears: number
+  showMilliseconds?: boolean
 }
 
 export type { UserProfile }

@@ -1,4 +1,12 @@
-import { createContext, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { logFocusSession } from '@/lib/focus-sessions'
 
@@ -7,6 +15,7 @@ type TimerMode = 'focus' | 'break'
 interface FocusTimerContextValue {
   mode: TimerMode
   secondsLeft: number
+  milliseconds: number
   running: boolean
   focusMinutes: number
   breakMinutes: number
@@ -28,6 +37,7 @@ function FocusTimerProvider({ children }: { children: ReactNode }) {
   const [breakMinutes, setBreakMinutes] = useState(DEFAULT_BREAK_MINUTES)
   const [mode, setMode] = useState<TimerMode>('focus')
   const [secondsLeft, setSecondsLeft] = useState(DEFAULT_FOCUS_MINUTES * 60)
+  const [milliseconds, setMilliseconds] = useState(0)
   const [running, setRunning] = useState(false)
   const intervalRef = useRef<number | null>(null)
   const modeRef = useRef(mode)
@@ -50,24 +60,35 @@ function FocusTimerProvider({ children }: { children: ReactNode }) {
     if (!running) return undefined
 
     intervalRef.current = window.setInterval(() => {
-      setSecondsLeft((current) => {
-        if (current <= 1) {
-          window.clearInterval(intervalRef.current ?? undefined)
-          setRunning(false)
-          const activeMode = modeRef.current
-          const userId = userIdRef.current
-          if (userId) {
-            logFocusSession(userId, {
-              mode: activeMode,
-              durationMinutes: activeMode === 'focus' ? durationsRef.current.focusMinutes : durationsRef.current.breakMinutes,
-              completedAt: new Date().toISOString(),
-            })
-          }
-          return 0
+      setMilliseconds((current) => {
+        const next = current - 50
+        if (next <= 0) {
+          setSecondsLeft((sec) => {
+            if (sec <= 1) {
+              window.clearInterval(intervalRef.current ?? undefined)
+              setRunning(false)
+              setMilliseconds(0)
+              const activeMode = modeRef.current
+              const userId = userIdRef.current
+              if (userId) {
+                logFocusSession(userId, {
+                  mode: activeMode,
+                  durationMinutes:
+                    activeMode === 'focus'
+                      ? durationsRef.current.focusMinutes
+                      : durationsRef.current.breakMinutes,
+                  completedAt: new Date().toISOString(),
+                })
+              }
+              return 0
+            }
+            return sec - 1
+          })
+          return 950
         }
-        return current - 1
+        return next
       })
-    }, 1000)
+    }, 50)
 
     return () => {
       if (intervalRef.current) window.clearInterval(intervalRef.current)
@@ -76,7 +97,12 @@ function FocusTimerProvider({ children }: { children: ReactNode }) {
 
   const switchMode = useCallback((next: TimerMode) => {
     setMode(next)
-    setSecondsLeft((next === 'focus' ? durationsRef.current.focusMinutes : durationsRef.current.breakMinutes) * 60)
+    setSecondsLeft(
+      (next === 'focus'
+        ? durationsRef.current.focusMinutes
+        : durationsRef.current.breakMinutes) * 60,
+    )
+    setMilliseconds(0)
     setRunning(false)
   }, [])
 
@@ -84,7 +110,12 @@ function FocusTimerProvider({ children }: { children: ReactNode }) {
 
   const reset = useCallback(() => {
     setRunning(false)
-    setSecondsLeft((modeRef.current === 'focus' ? durationsRef.current.focusMinutes : durationsRef.current.breakMinutes) * 60)
+    setSecondsLeft(
+      (modeRef.current === 'focus'
+        ? durationsRef.current.focusMinutes
+        : durationsRef.current.breakMinutes) * 60,
+    )
+    setMilliseconds(0)
   }, [])
 
   const setDurations = useCallback((nextFocus: number, nextBreak: number) => {
@@ -92,6 +123,7 @@ function FocusTimerProvider({ children }: { children: ReactNode }) {
     setBreakMinutes(nextBreak)
     setRunning(false)
     setSecondsLeft((modeRef.current === 'focus' ? nextFocus : nextBreak) * 60)
+    setMilliseconds(0)
   }, [])
 
   const totalSeconds = (mode === 'focus' ? focusMinutes : breakMinutes) * 60
@@ -100,6 +132,7 @@ function FocusTimerProvider({ children }: { children: ReactNode }) {
     () => ({
       mode,
       secondsLeft,
+      milliseconds,
       running,
       focusMinutes,
       breakMinutes,
@@ -109,7 +142,19 @@ function FocusTimerProvider({ children }: { children: ReactNode }) {
       setDurations,
       reset,
     }),
-    [mode, secondsLeft, running, focusMinutes, breakMinutes, totalSeconds, toggleRunning, switchMode, setDurations, reset],
+    [
+      mode,
+      secondsLeft,
+      milliseconds,
+      running,
+      focusMinutes,
+      breakMinutes,
+      totalSeconds,
+      toggleRunning,
+      switchMode,
+      setDurations,
+      reset,
+    ],
   )
 
   return <FocusTimerContext.Provider value={value}>{children}</FocusTimerContext.Provider>

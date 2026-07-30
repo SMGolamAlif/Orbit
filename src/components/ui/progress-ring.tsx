@@ -28,6 +28,7 @@ function ProgressRing({
   const circumference = radius * 2 * Math.PI
   const clamped = Math.min(100, Math.max(0, progress))
   const offset = circumference - (clamped / 100) * circumference
+  const innerSize = size - strokeWidth * 2
 
   return (
     <div
@@ -69,7 +70,15 @@ function ProgressRing({
         />
       </svg>
       {children ? (
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          className="absolute flex items-center justify-center overflow-hidden"
+          style={{
+            width: innerSize,
+            height: innerSize,
+            left: strokeWidth,
+            top: strokeWidth,
+          }}
+        >
           {children}
         </div>
       ) : null}
