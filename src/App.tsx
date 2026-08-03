@@ -4,6 +4,7 @@ import ProtectedRoute from '@/components/ProtectedRoute'
 import Clock from '@/pages/Clock'
 import Dashboard from '@/pages/Dashboard'
 import FocusTimer from '@/pages/FocusTimer'
+import Habits from '@/pages/Habits'
 import Insights from '@/pages/Insights'
 import Kanban from '@/pages/Kanban'
 import LifeCalendarPage from '@/pages/LifeCalendarPage'
@@ -44,6 +45,7 @@ function App() {
         <Route path="/focus-timer" element={<FocusTimer />} />
         <Route path="/clock" element={<Clock />} />
         <Route path="/insights" element={<Insights />} />
+        <Route path="/habits" element={<Habits />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

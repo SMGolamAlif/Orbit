@@ -6,6 +6,7 @@ import {
   Kanban,
   LayoutDashboard,
   LineChart,
+  ListChecks,
   NotebookPen,
   Settings,
   Timer,
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
   { to: '/focus-timer', label: 'Focus Timer', icon: Timer, end: false },
   { to: '/clock', label: 'Clock', icon: Clock, end: false },
   { to: '/insights', label: 'Insights', icon: LineChart, end: false },
+  { to: '/habits', label: 'Habits', icon: ListChecks, end: false },
   { to: '/settings', label: 'Settings', icon: Settings, end: false },
 ]
 

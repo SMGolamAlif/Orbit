@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FocusTimerCard } from '@/components/dashboard/FocusTimerCard'
+import { HabitsCard } from '@/components/dashboard/HabitsCard'
 import { LifeCalendarHero } from '@/components/dashboard/LifeCalendarHero'
 import { LifeOverviewCard } from '@/components/dashboard/LifeOverviewCard'
 import { QuickNotesCard } from '@/components/dashboard/QuickNotesCard'
@@ -15,7 +16,10 @@ function Dashboard() {
   const { profile } = useAuth()
   const navigate = useNavigate()
 
-  const birthDate = useMemo(() => (profile ? new Date(profile.birthDate) : new Date()), [profile])
+  const birthDate = useMemo(
+    () => (profile ? new Date(profile.birthDate) : new Date()),
+    [profile],
+  )
   const lifeExpectancyYears = profile?.lifeExpectancyYears ?? DEFAULT_LIFE_EXPECTANCY
   const stats = useMemo(
     () => getLifeCalendarStats(birthDate, lifeExpectancyYears),
@@ -41,6 +45,7 @@ function Dashboard() {
       <div className="flex h-full min-h-0 flex-col gap-6 overflow-y-auto pr-1">
         <LifeOverviewCard stats={stats} onOpenInsights={() => navigate('/insights')} />
         <TodaysFocusCard />
+        <HabitsCard />
         <QuoteCard />
       </div>
     </div>
