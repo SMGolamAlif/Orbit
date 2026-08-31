@@ -301,7 +301,7 @@ export function hexToRgb(hex: string): [number, number, number] {
  */
 export function sortHabits(habits: Habit[]): Habit[] {
   return [...habits].sort((a, b) => {
-    if (a.order !== b.order) return a.order - b.order
+    if ((a.order ?? 0) !== (b.order ?? 0)) return (a.order ?? 0) - (b.order ?? 0)
     return new Date(a.$createdAt).getTime() - new Date(b.$createdAt).getTime()
   })
 }

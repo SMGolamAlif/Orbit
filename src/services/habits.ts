@@ -25,6 +25,27 @@ const userPermissions = (userId: string) => [
   Permission.delete(Role.user(userId)),
 ]
 
+function toHabit(document: Record<string, unknown>): Habit {
+  const { targetDays, ...data } = document
+  return {
+    ...data,
+    targetCount: Number(targetDays),
+    order: 0,
+  } as Habit
+}
+
+function toHabitLog(document: Record<string, unknown>): HabitLog {
+  return {
+    ...document,
+    date: String(document.date).slice(0, 10),
+    count: document.completed ? 1 : 0,
+  } as HabitLog
+}
+
+function toAppwriteDate(date: string) {
+  return `${date}T00:00:00.000Z`
+}
+
 const habitService = {
   async listHabits(userId: string): Promise<Habit[]> {
     assertConfigured()
@@ -32,14 +53,11 @@ const habitService = {
     const response = await databases.listDocuments(
       APPWRITE_DATABASE_ID,
       APPWRITE_HABITS_COLLECTION_ID,
-      [
-        Query.equal('userId', userId),
-        Query.orderAsc('order'),
-        Query.orderAsc('$createdAt'),
-        Query.limit(200),
-      ],
+      [Query.equal('userId', userId), Query.orderAsc('$createdAt'), Query.limit(200)],
     )
-    return response.documents as unknown as Habit[]
+    return response.documents.map((document) =>
+      toHabit(document as unknown as Record<string, unknown>),
+    )
   },
 
   async createHabit(userId: string, input: HabitInput): Promise<Habit> {
@@ -49,22 +67,37 @@ const habitService = {
       APPWRITE_DATABASE_ID,
       APPWRITE_HABITS_COLLECTION_ID,
       ID.unique(),
-      { ...input, userId },
+      {
+        title: input.title,
+        description: input.description,
+        color: input.color,
+        icon: 'Target',
+        frequency: input.frequency,
+        targetDays: input.targetCount,
+        archived: input.archived ?? false,
+        userId,
+        customDays: input.customDays,
+        reminderTime: input.reminderTime,
+      },
       userPermissions(userId),
     )
-    return doc as unknown as Habit
+    return toHabit(doc as unknown as Record<string, unknown>)
   },
 
   async updateHabit(habitId: string, input: Partial<HabitInput>): Promise<Habit> {
     assertConfigured()
 
+    const { targetCount, order, ...data } = input
     const doc = await databases.updateDocument(
       APPWRITE_DATABASE_ID,
       APPWRITE_HABITS_COLLECTION_ID,
       habitId,
-      input,
+      {
+        ...data,
+        ...(targetCount === undefined ? {} : { targetDays: targetCount }),
+      },
     )
-    return doc as unknown as Habit
+    return toHabit(doc as unknown as Record<string, unknown>)
   },
 
   async deleteHabit(habitId: string): Promise<void> {
@@ -77,22 +110,8 @@ const habitService = {
     )
   },
 
-  async reorderHabits(habits: Habit[]): Promise<void> {
-    assertConfigured()
-
-    // Batch update order for all habits
-    await Promise.all(
-      habits.map((habit, index) =>
-        databases.updateDocument(
-          APPWRITE_DATABASE_ID,
-          APPWRITE_HABITS_COLLECTION_ID,
-          habit.$id,
-          {
-            order: index,
-          },
-        ),
-      ),
-    )
+  async reorderHabits(_habits: Habit[]): Promise<void> {
+    // The deployed collection has no order attribute; creation time is the stable order.
   },
 
   // Habit Logs
@@ -113,7 +132,9 @@ const habitService = {
       APPWRITE_HABIT_LOGS_COLLECTION_ID,
       queries,
     )
-    return response.documents as unknown as HabitLog[]
+    return response.documents.map((document) =>
+      toHabitLog(document as unknown as Record<string, unknown>),
+    )
   },
 
   async createHabitLog(userId: string, input: HabitLogInput): Promise<HabitLog> {
@@ -126,7 +147,7 @@ const habitService = {
       { ...input, userId },
       userPermissions(userId),
     )
-    return doc as unknown as HabitLog
+    return toHabitLog(doc as unknown as Record<string, unknown>)
   },
 
   async updateHabitLog(logId: string, input: Partial<HabitLogInput>): Promise<HabitLog> {
@@ -138,14 +159,14 @@ const habitService = {
       logId,
       input,
     )
-    return doc as unknown as HabitLog
+    return toHabitLog(doc as unknown as Record<string, unknown>)
   },
 
   async upsertHabitLog(
     userId: string,
     habitId: string,
     date: string,
-    count: number,
+    completed: boolean,
   ): Promise<HabitLog> {
     assertConfigured()
 
@@ -156,30 +177,28 @@ const habitService = {
       [
         Query.equal('userId', userId),
         Query.equal('habitId', habitId),
-        Query.equal('date', date),
+        Query.equal('date', toAppwriteDate(date)),
         Query.limit(1),
       ],
     )
-
-    const completed = count > 0 // Will be updated with actual target check in hook
 
     if (existing.documents.length > 0) {
       const doc = await databases.updateDocument(
         APPWRITE_DATABASE_ID,
         APPWRITE_HABIT_LOGS_COLLECTION_ID,
         existing.documents[0].$id,
-        { count, completed },
+        { completed },
       )
-      return doc as unknown as HabitLog
+      return toHabitLog(doc as unknown as Record<string, unknown>)
     } else {
       const doc = await databases.createDocument(
         APPWRITE_DATABASE_ID,
         APPWRITE_HABIT_LOGS_COLLECTION_ID,
         ID.unique(),
-        { userId, habitId, date, count, completed },
+        { userId, habitId, date: toAppwriteDate(date), completed },
         userPermissions(userId),
       )
-      return doc as unknown as HabitLog
+      return toHabitLog(doc as unknown as Record<string, unknown>)
     }
   },
 

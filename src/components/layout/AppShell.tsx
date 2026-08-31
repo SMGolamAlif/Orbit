@@ -19,11 +19,14 @@ function AppShell() {
 
   return (
     <FocusTimerProvider>
-      <div className="flex min-h-screen bg-bg text-ink">
-        <Sidebar progressPercent={stats?.progressPercent ?? 0} weeksLived={stats?.weeksLived ?? 0} />
-        <div className="flex flex-1 flex-col">
+      <div className="flex min-h-screen bg-bg text-ink xl:h-screen xl:overflow-hidden">
+        <Sidebar
+          progressPercent={stats?.progressPercent ?? 0}
+          weeksLived={stats?.weeksLived ?? 0}
+        />
+        <div className="flex min-w-0 flex-1 flex-col">
           <Topbar />
-          <main className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+          <main className="min-h-0 flex-1 overflow-y-auto px-6 py-6 xl:overflow-hidden">
             <Outlet />
           </main>
           <FooterBar />

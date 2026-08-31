@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useHabits } from '@/hooks/useHabits'
 import type { Habit, HabitInput } from '@/types/habit'
 import { shouldTrackHabitOnDate, sortHabits, filterActiveHabits } from '@/lib/habit-utils'
@@ -20,10 +20,8 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
-  Target,
   Flame,
   CheckCircle2,
-  XCircle,
   GripVertical,
   MoreHorizontal,
   Archive,
@@ -44,7 +42,6 @@ function HabitsPage() {
     reorderHabits,
     upsertHabitLog,
     isHabitCompletedOnDate,
-    getHabitCountOnDate,
   } = useHabits()
 
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list')
@@ -52,6 +49,8 @@ function HabitsPage() {
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null)
   const [selectedDate] = useState(new Date().toISOString().slice(0, 10))
   const [dragActive, setDragActive] = useState<string | null>(null)
+  const [openMenuHabitId, setOpenMenuHabitId] = useState<string | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   // Form state
   const [formTitle, setFormTitle] = useState('')
@@ -60,12 +59,30 @@ function HabitsPage() {
     'daily',
   )
   const [formCustomDays, setFormCustomDays] = useState<number[]>([])
-  const [formTargetCount, setFormTargetCount] = useState(1)
   const [formColor, setFormColor] = useState('#6366f1')
   const [formError, setFormError] = useState('')
 
   const today = new Date().toISOString().slice(0, 10)
   const activeHabits = useMemo(() => filterActiveHabits(sortHabits(habits)), [habits])
+
+  useEffect(() => {
+    function closeMenu(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpenMenuHabitId(null)
+      }
+    }
+
+    function closeMenuOnEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpenMenuHabitId(null)
+    }
+
+    document.addEventListener('mousedown', closeMenu)
+    document.addEventListener('keydown', closeMenuOnEscape)
+    return () => {
+      document.removeEventListener('mousedown', closeMenu)
+      document.removeEventListener('keydown', closeMenuOnEscape)
+    }
+  }, [])
 
   // Drag and drop for reordering
   const { dragProps, dropProps } = useDragAndDrop({
@@ -81,7 +98,6 @@ function HabitsPage() {
     setFormDescription('')
     setFormFrequency('daily')
     setFormCustomDays([])
-    setFormTargetCount(1)
     setFormColor('#6366f1')
     setFormError('')
   }
@@ -98,7 +114,6 @@ function HabitsPage() {
     setFormDescription(habit.description || '')
     setFormFrequency(habit.frequency)
     setFormCustomDays(habit.customDays || [])
-    setFormTargetCount(habit.targetCount)
     setFormColor(habit.color)
     setShowForm(true)
   }
@@ -106,6 +121,7 @@ function HabitsPage() {
   const closeForm = () => {
     setShowForm(false)
     setEditingHabit(null)
+    setOpenMenuHabitId(null)
     resetForm()
   }
 
@@ -125,7 +141,7 @@ function HabitsPage() {
       description: formDescription.trim(),
       frequency: formFrequency,
       customDays: formFrequency === 'custom' ? formCustomDays : undefined,
-      targetCount: formTargetCount,
+      targetCount: 1,
       color: formColor,
       order: activeHabits.length,
     }
@@ -171,39 +187,19 @@ function HabitsPage() {
     }
   }
 
-  const handleIncrementCount = async (habit: Habit, date: string) => {
-    const currentCount = getHabitCountOnDate(habit.$id, date)
-    const newCount = currentCount + 1
-    try {
-      await upsertHabitLog({ habitId: habit.$id, date, count: newCount })
-    } catch {
-      alert('Failed to update habit')
-    }
-  }
-
-  const handleDecrementCount = async (habit: Habit, date: string) => {
-    const currentCount = getHabitCountOnDate(habit.$id, date)
-    const newCount = Math.max(0, currentCount - 1)
-    try {
-      await upsertHabitLog({ habitId:  habit.$id, date, count: newCount })
-    } catch {
-      alert('Failed to update habit')
-    }
-  }
-
   const renderHabitList = () => (
     <div className="space-y-3">
       {activeHabits.map((habit) => {
         const stats = habitStats.get(habit.$id)
         const completed = isHabitCompletedOnDate(habit.$id, today)
-        const todayCount = getHabitCountOnDate(habit.$id, today)
 
         return (
           <GlassCard
             key={habit.$id}
             className={cn(
-              'flex items-center gap-4 p-4 transition-all',
+              'relative flex items-center gap-4 p-4 transition-all',
               dragActive === habit.$id && 'opacity-50 ring-2 ring-primary',
+              openMenuHabitId === habit.$id && 'z-20',
             )}
             {...dropProps(habit.$id)}
           >
@@ -252,12 +248,6 @@ function HabitsPage() {
                   <Flame className="h-3.5 w-3.5 text-amber-500" />
                   <span>{stats?.streak.current ?? 0} day streak</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Target className="h-3.5 w-3.5" />
-                  <span>
-                    {todayCount}/{habit.targetCount}
-                  </span>
-                </div>
                 {stats?.completionRate && (
                   <div className="flex-1 h-1.5 bg-surface-2 rounded-full overflow-hidden">
                     <div
@@ -273,30 +263,6 @@ function HabitsPage() {
 
             {/* Actions */}
             <div className="flex items-center gap-2">
-              {habit.targetCount > 1 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => handleDecrementCount(habit, today)}
-                    disabled={todayCount <= 0}
-                    className="rounded-full p-1.5 text-ink-secondary hover:text-ink hover:bg-surface-2 transition-colors disabled:opacity-50"
-                    aria-label="Decrease count"
-                  >
-                    <XCircle className="h-4 w-4" strokeWidth={2.5} />
-                  </button>
-                  <span className="w-8 text-center font-mono text-ink">{todayCount}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleIncrementCount(habit, today)}
-                    disabled={todayCount >= habit.targetCount}
-                    className="rounded-full p-1.5 text-ink-secondary hover:text-ink hover:bg-surface-2 transition-colors disabled:opacity-50"
-                    aria-label="Increase count"
-                  >
-                    <CheckCircle2 className="h-4 w-4" strokeWidth={2.5} />
-                  </button>
-                </>
-              )}
-
               <button
                 type="button"
                 onClick={() => handleToggleComplete(habit, today)}
@@ -315,40 +281,57 @@ function HabitsPage() {
                 )}
               </button>
 
-              <div className="relative">
+              <div
+                ref={openMenuHabitId === habit.$id ? menuRef : null}
+                className="relative"
+              >
                 <button
                   type="button"
+                  onClick={() =>
+                    setOpenMenuHabitId((current) =>
+                      current === habit.$id ? null : habit.$id,
+                    )
+                  }
                   className="rounded-full p-2 text-ink-secondary hover:text-ink hover:bg-surface-2 transition-colors"
-                  aria-label="More options"
+                  aria-label={`More options for ${habit.title}`}
+                  aria-expanded={openMenuHabitId === habit.$id}
                 >
                   <MoreHorizontal className="h-5 w-5" />
                 </button>
-                <div className="absolute right-0 top-full mt-1 w-36 glass-card rounded-lg shadow-lg py-1 z-10">
-                  <button
-                    type="button"
-                    onClick={() => openEditForm(habit)}
-                    className="w-full px-3 py-2 text-left text-sm text-ink hover:bg-surface-2"
-                  >
-                    <Pencil className="h-4 w-4 inline mr-2" />
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleArchive(habit.$id, !habit.archived)}
-                    className="w-full px-3 py-2 text-left text-sm text-ink hover:bg-surface-2"
-                  >
-                    <Archive className="h-4 w-4 inline mr-2" />
-                    {habit.archived ? 'Unarchive' : 'Archive'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(habit.$id)}
-                    className="w-full px-3 py-2 text-left text-sm text-red-500 hover:bg-red-500/10"
-                  >
-                    <Trash2 className="h-4 w-4 inline mr-2" />
-                    Delete
-                  </button>
-                </div>
+                {openMenuHabitId === habit.$id ? (
+                  <div className="absolute right-0 top-full z-30 mt-2 w-40 overflow-hidden rounded-card border border-glass-border bg-surface py-1 shadow-glass">
+                    <button
+                      type="button"
+                      onClick={() => openEditForm(habit)}
+                      className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-ink transition-colors hover:bg-tint/5"
+                    >
+                      <Pencil className="h-4 w-4" />
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOpenMenuHabitId(null)
+                        handleArchive(habit.$id, !habit.archived)
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-ink transition-colors hover:bg-tint/5"
+                    >
+                      <Archive className="h-4 w-4" />
+                      {habit.archived ? 'Unarchive' : 'Archive'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOpenMenuHabitId(null)
+                        handleDelete(habit.$id)
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-danger transition-colors hover:bg-danger/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete
+                    </button>
+                  </div>
+                ) : null}
               </div>
             </div>
           </GlassCard>
@@ -478,7 +461,6 @@ function HabitsPage() {
                 .filter((h) => shouldTrackHabitOnDate(h, new Date(selectedDate)))
                 .map((habit) => {
                   const completed = isHabitCompletedOnDate(habit.$id, selectedDate)
-                  const count = getHabitCountOnDate(habit.$id, selectedDate)
 
                   return (
                     <GlassCard key={habit.$id} className="flex items-center gap-4 p-4">
@@ -494,36 +476,6 @@ function HabitsPage() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        {habit.targetCount > 1 && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => handleDecrementCount(habit, selectedDate)}
-                              disabled={count <= 0 || isFuture(selectedDate)}
-                              className="rounded-full p-2 text-ink-secondary hover:text-ink hover:bg-surface-2 transition-colors disabled:opacity-50"
-                              aria-label="Decrease count"
-                            >
-                              <XCircle className="h-4 w-4" strokeWidth={2.5} />
-                            </button>
-                            <span className="w-8 text-center font-mono text-ink">
-                              {count}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => handleIncrementCount(habit, selectedDate)}
-                              disabled={
-                                count >= habit.targetCount || isFuture(selectedDate)
-                              }
-                              className="rounded-full p-2 text-ink-secondary hover:text-ink hover:bg-surface-2 transition-colors disabled:opacity-50"
-                              aria-label="Increase count"
-                            >
-                              <CheckCircle2 className="h-4 w-4" strokeWidth={2.5} />
-                            </button>
-                            <span className="text-ink-secondary font-mono">
-                              /{habit.targetCount}
-                            </span>
-                          </>
-                        )}
                         <button
                           type="button"
                           onClick={() => handleToggleComplete(habit, selectedDate)}
@@ -616,42 +568,49 @@ function HabitsPage() {
 
       {/* Add/Edit Habit Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <GlassCard className="w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-ink">
-                {editingHabit ? 'Edit Habit' : 'New Habit'}
-              </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <GlassCard className="max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto p-6 sm:p-7">
+            <div className="mb-7 flex items-start justify-between gap-6">
+              <div className="space-y-1">
+                <h2 className="text-xl font-semibold text-ink">
+                  {editingHabit ? 'Edit Habit' : 'New Habit'}
+                </h2>
+                <p className="text-sm text-ink-secondary">
+                  Set the rhythm you want to keep.
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={closeForm}
-                className="rounded-full p-2 text-ink-secondary hover:text-ink hover:bg-surface-2"
+                aria-label="Close habit form"
+                className="shrink-0 rounded-full p-2 text-ink-secondary transition-colors hover:bg-tint/5 hover:text-ink"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {formError && (
-                <div className="text-sm text-red-500 bg-red-500/10 p-3 rounded-lg">
+                <div className="rounded-control bg-danger/10 px-3 py-2.5 text-sm text-danger">
                   {formError}
                 </div>
               )}
 
-              <div>
-                <label className="text-xs text-ink-secondary">Title *</label>
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-ink-secondary">Title *</label>
                 <Input
                   value={formTitle}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setFormTitle(e.target.value)
                   }
                   placeholder="Enter habit title"
-                  className="mt-1"
                 />
               </div>
 
-              <div>
-                <label className="text-xs text-ink-secondary">Description</label>
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-ink-secondary">
+                  Description
+                </label>
                 <Textarea
                   value={formDescription}
                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
@@ -659,12 +618,13 @@ function HabitsPage() {
                   }
                   placeholder="Optional description"
                   rows={3}
-                  className="mt-1"
                 />
               </div>
 
-              <div>
-                <label className="text-xs text-ink-secondary">Frequency *</label>
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-ink-secondary">
+                  Frequency *
+                </label>
                 <Select
                   value={formFrequency}
                   onValueChange={(value) =>
@@ -683,9 +643,9 @@ function HabitsPage() {
               </div>
 
               {formFrequency === 'custom' && (
-                <div>
-                  <label className="text-xs text-ink-secondary">Days *</label>
-                  <div className="flex flex-wrap gap-2 mt-1">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-ink-secondary">Days *</label>
+                  <div className="flex flex-wrap gap-2">
                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(
                       (day, index) => (
                         <button
@@ -713,23 +673,9 @@ function HabitsPage() {
                 </div>
               )}
 
-              <div>
-                <label className="text-xs text-ink-secondary">Target Count *</label>
-                <Input
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={formTargetCount}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setFormTargetCount(Number(e.target.value))
-                  }
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-ink-secondary">Color</label>
-                <div className="flex gap-2 mt-1">
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-ink-secondary">Color</label>
+                <div className="flex flex-wrap gap-2">
                   {[
                     '#6366f1',
                     '#ec4899',
@@ -757,7 +703,7 @@ function HabitsPage() {
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-3 border-t border-glass-border pt-5">
                 <Button
                   type="button"
                   variant="ghost"
