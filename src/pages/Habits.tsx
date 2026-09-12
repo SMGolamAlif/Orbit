@@ -165,7 +165,7 @@ function HabitsPage() {
     const completed = isHabitCompletedOnDate(habit.$id, date)
     const newCount = completed ? 0 : habit.targetCount
     try {
-      await upsertHabitLog({ habitId: habit.$id, date, count: newCount })
+      await upsertHabitLog({ habitId: habit.$id, date, count: newCount, targetCount: habit.targetCount })
     } catch {
       alert('Failed to update habit')
     }
@@ -175,7 +175,7 @@ function HabitsPage() {
     const currentCount = getHabitCountOnDate(habit.$id, date)
     const newCount = currentCount + 1
     try {
-      await upsertHabitLog({ habitId: habit.$id, date, count: newCount })
+      await upsertHabitLog({ habitId: habit.$id, date, count: newCount, targetCount: habit.targetCount })
     } catch {
       alert('Failed to update habit')
     }
@@ -185,7 +185,7 @@ function HabitsPage() {
     const currentCount = getHabitCountOnDate(habit.$id, date)
     const newCount = Math.max(0, currentCount - 1)
     try {
-      await upsertHabitLog({ habitId:  habit.$id, date, count: newCount })
+      await upsertHabitLog({ habitId: habit.$id, date, count: newCount, targetCount: habit.targetCount })
     } catch {
       alert('Failed to update habit')
     }

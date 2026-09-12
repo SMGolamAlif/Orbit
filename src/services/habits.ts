@@ -146,8 +146,11 @@ const habitService = {
     habitId: string,
     date: string,
     count: number,
+    targetCount: number,
   ): Promise<HabitLog> {
     assertConfigured()
+
+    const completed = count >= targetCount
 
     // Check if log exists for this habit on this date
     const existing = await databases.listDocuments(
@@ -160,8 +163,6 @@ const habitService = {
         Query.limit(1),
       ],
     )
-
-    const completed = count > 0 // Will be updated with actual target check in hook
 
     if (existing.documents.length > 0) {
       const doc = await databases.updateDocument(
