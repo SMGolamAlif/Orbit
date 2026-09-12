@@ -145,7 +145,17 @@ function useHabits() {
       targetCount: number
     }) => {
       if (!user) throw new Error('You must be logged in to update a habit')
+<<<<<<< HEAD
       return habitService.upsertHabitLog(user.$id, habitId, date, count, targetCount)
+=======
+      const habit = habitsQuery.data?.find((item) => item.$id === habitId)
+      return habitService.upsertHabitLog(
+        user.$id,
+        habitId,
+        date,
+        count >= (habit?.targetCount ?? 1),
+      )
+>>>>>>> 6a438a6243141d4af6fa7731d7ef53159cc9ce64
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: HABIT_LOGS_QUERY_KEY }),
   })
@@ -161,7 +171,9 @@ function useHabits() {
 
   // Helper to get count for a habit on a specific date
   const getHabitCountOnDate = (habitId: string, date: string) =>
-    logsByDate.get(date)?.find((l) => l.habitId === habitId)?.count ?? 0
+    logsByDate.get(date)?.find((l) => l.habitId === habitId)?.completed
+      ? (habitsQuery.data?.find((habit) => habit.$id === habitId)?.targetCount ?? 1)
+      : 0
 
   // Helper to toggle habit completion for today
   const toggleHabitToday = async (habit: Habit) => {

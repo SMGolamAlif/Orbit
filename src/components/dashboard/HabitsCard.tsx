@@ -5,14 +5,8 @@ import { useHabits } from '@/hooks/useHabits'
 import { cn } from '@/lib/utils'
 
 function HabitsCard() {
-  const {
-    habits,
-    habitStats,
-    isLoading,
-    toggleHabitToday,
-    isHabitCompletedToday,
-    getHabitTodayCount,
-  } = useHabits()
+  const { habits, habitStats, isLoading, toggleHabitToday, isHabitCompletedToday } =
+    useHabits()
 
   const activeHabits = habits.filter((h) => !h.archived)
   const habitsToShow = activeHabits.slice(0, 5)
@@ -54,7 +48,6 @@ function HabitsCard() {
           {habitsToShow.map((habit) => {
             const stats = habitStats.get(habit.$id)
             const completed = isHabitCompletedToday(habit.$id)
-            const todayCount = getHabitTodayCount(habit.$id)
 
             return (
               <li
@@ -92,11 +85,6 @@ function HabitsCard() {
                       {habit.title}
                     </p>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      {habit.targetCount > 1 && (
-                        <span className="font-mono text-xs text-ink-secondary">
-                          {todayCount}/{habit.targetCount}
-                        </span>
-                      )}
                       {stats && stats.streak.current > 0 && (
                         <span className="flex items-center gap-0.5 text-[10px] font-medium text-amber-600">
                           <Flame className="h-2.5 w-2.5" strokeWidth={2} />
@@ -106,34 +94,6 @@ function HabitsCard() {
                     </div>
                   </div>
                 </button>
-                {habit.targetCount > 1 && (
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        // Decrement logic would go here
-                      }}
-                      className="rounded p-0.5 text-ink-secondary/60 hover:bg-tint/10"
-                      disabled={todayCount <= 0}
-                    >
-                      <span className="h-3 w-3">−</span>
-                    </button>
-                    <span className="w-6 text-center text-xs font-mono text-ink">
-                      {todayCount}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        // Increment logic would go here
-                      }}
-                      className="rounded p-0.5 text-ink-secondary/60 hover:bg-tint/10"
-                    >
-                      <span className="h-3 w-3">+</span>
-                    </button>
-                  </div>
-                )}
               </li>
             )
           })}
