@@ -8,6 +8,11 @@ import {
 } from '@/config/appwrite'
 import { useAuth } from '@/hooks/useAuth'
 import { habitService } from '@/services/habits'
+import {
+  addItemToCache,
+  removeItemFromCache,
+  updateItemInCache,
+} from '@/lib/optimistic-mutations'
 import type { Habit, HabitInput, HabitLog } from '@/types/habit'
 import {
   calculateStreak,
@@ -79,7 +84,7 @@ function useHabits() {
       const completionRate = calculateCompletionRate(habit, logs)
       const weeklyHeatmap = generateWeeklyHeatmap(habit, logs)
       const totalCompletions = logs.filter((l) => l.completed).length
-      const totalTarget = habit.targetCount * Math.max(1, Math.ceil(logs.length / 7)) // rough estimate
+      const totalTarget = habit.targetCount * Math.max(1, Math.ceil(logs.length / 7))
       map.set(habit.$id, {
         streak,
         completionRate,
@@ -113,18 +118,77 @@ function useHabits() {
       if (!user) throw new Error('You must be logged in to create a habit')
       return habitService.createHabit(user.$id, input)
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: HABITS_QUERY_KEY }),
+    onMutate: async (input) => {
+      await queryClient.cancelQueries({ queryKey: HABITS_QUERY_KEY })
+      const previousData = queryClient.getQueryData(HABITS_QUERY_KEY)
+
+      const optimisticHabit = {
+        $id: `temp-${Date.now()}`,
+        title: input.title,
+        description: input.description,
+        color: input.color,
+        icon: 'Target',
+        frequency: input.frequency,
+        targetCount: input.targetCount,
+        archived: input.archived ?? false,
+        customDays: input.customDays,
+        reminderTime: input.reminderTime,
+        order: 0,
+      }
+      addItemToCache(queryClient, HABITS_QUERY_KEY, optimisticHabit)
+
+      return { previousData }
+    },
+    onSuccess: (newHabit) => {
+      updateItemInCache(queryClient, HABITS_QUERY_KEY, (habits) =>
+        (habits as any[]).map((h) => (h.$id?.startsWith('temp-') ? newHabit : h)),
+      )
+    },
+    onError: (error, _input, context: any) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(HABITS_QUERY_KEY, context.previousData)
+      }
+      console.error('Error creating habit:', error)
+    },
   })
 
   const updateHabit = useMutation({
     mutationFn: ({ id, input }: { id: string; input: Partial<HabitInput> }) =>
       habitService.updateHabit(id, input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: HABITS_QUERY_KEY }),
+    onMutate: async ({ id, input }) => {
+      await queryClient.cancelQueries({ queryKey: HABITS_QUERY_KEY })
+      const previousData = queryClient.getQueryData(HABITS_QUERY_KEY)
+
+      updateItemInCache(queryClient, HABITS_QUERY_KEY, (habits) =>
+        (habits as any[]).map((h) => (h.$id === id ? { ...h, ...input } : h)),
+      )
+
+      return { previousData }
+    },
+    onError: (error, _input, context: any) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(HABITS_QUERY_KEY, context.previousData)
+      }
+      console.error('Error updating habit:', error)
+    },
   })
 
   const deleteHabit = useMutation({
     mutationFn: (id: string) => habitService.deleteHabit(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: HABITS_QUERY_KEY }),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: HABITS_QUERY_KEY })
+      const previousData = queryClient.getQueryData(HABITS_QUERY_KEY)
+
+      removeItemFromCache(queryClient, HABITS_QUERY_KEY, id)
+
+      return { previousData }
+    },
+    onError: (error, _input, context: any) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(HABITS_QUERY_KEY, context.previousData)
+      }
+      console.error('Error deleting habit:', error)
+    },
   })
 
   const reorderHabits = useMutation({
@@ -147,12 +211,66 @@ function useHabits() {
       if (!user) throw new Error('You must be logged in to update a habit')
       return habitService.upsertHabitLog(user.$id, habitId, date, count, targetCount)
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: HABIT_LOGS_QUERY_KEY }),
+    onMutate: async ({ habitId, date, count, targetCount }) => {
+      await queryClient.cancelQueries({ queryKey: HABIT_LOGS_QUERY_KEY })
+      const previousData = queryClient.getQueryData(HABIT_LOGS_QUERY_KEY)
+
+      const completed = count >= targetCount
+
+      // Check if log exists in cache
+      const logs = previousData as HabitLog[] | undefined
+      const existingLog = logs?.find((l) => l.habitId === habitId && l.date === date)
+
+      if (existingLog) {
+        // Update existing log
+        updateItemInCache(queryClient, HABIT_LOGS_QUERY_KEY, (logs) =>
+          (logs as any[]).map((l: any) =>
+            l.habitId === habitId && l.date === date ? { ...l, completed, count } : l,
+          ),
+        )
+      } else {
+        // Add new log
+        const optimisticLog = {
+          $id: `temp-${Date.now()}`,
+          habitId,
+          date,
+          count,
+          completed,
+        }
+        addItemToCache(queryClient, HABIT_LOGS_QUERY_KEY, optimisticLog)
+      }
+
+      return { previousData }
+    },
+    onSuccess: (newLog) => {
+      updateItemInCache(queryClient, HABIT_LOGS_QUERY_KEY, (logs) =>
+        (logs as any[]).map((l: any) => (l.$id?.startsWith('temp-') ? newLog : l)),
+      )
+    },
+    onError: (error, _input, context: any) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(HABIT_LOGS_QUERY_KEY, context.previousData)
+      }
+      console.error('Error upserting habit log:', error)
+    },
   })
 
   const deleteHabitLog = useMutation({
     mutationFn: (id: string) => habitService.deleteHabitLog(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: HABIT_LOGS_QUERY_KEY }),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: HABIT_LOGS_QUERY_KEY })
+      const previousData = queryClient.getQueryData(HABIT_LOGS_QUERY_KEY)
+
+      removeItemFromCache(queryClient, HABIT_LOGS_QUERY_KEY, id)
+
+      return { previousData }
+    },
+    onError: (error, _input, context: any) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(HABIT_LOGS_QUERY_KEY, context.previousData)
+      }
+      console.error('Error deleting habit log:', error)
+    },
   })
 
   // Helper to check if habit is completed on a specific date

@@ -7,6 +7,11 @@ import {
 } from '@/config/appwrite'
 import { useAuth } from '@/hooks/useAuth'
 import { workbookService } from '@/services/workbook'
+import {
+  addItemToCache,
+  removeItemFromCache,
+  updateItemInCache,
+} from '@/lib/optimistic-mutations'
 import type { WorkbookEntryInput } from '@/types/workbook'
 
 const WORKBOOK_QUERY_KEY = ['workbook']
@@ -36,7 +41,6 @@ function useWorkbook() {
     const map = new Map<string, typeof query.data>()
     if (!query.data) return map
     for (const entry of query.data) {
-      // Normalize date to YYYY-MM-DD in case Appwrite stores it differently
       const raw = entry.date ?? ''
       const dateKey = raw.slice(0, 10)
       if (!dateKey) continue
@@ -55,18 +59,69 @@ function useWorkbook() {
   const createEntry = useMutation({
     mutationFn: (input: WorkbookEntryInput) =>
       workbookService.createEntry(user!.$id, input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: WORKBOOK_QUERY_KEY }),
+    onMutate: async (input) => {
+      await queryClient.cancelQueries({ queryKey: WORKBOOK_QUERY_KEY })
+      const previousData = queryClient.getQueryData(WORKBOOK_QUERY_KEY)
+
+      const optimisticEntry = {
+        $id: `temp-${Date.now()}`,
+        ...input,
+        $createdAt: new Date().toISOString(),
+      }
+      addItemToCache(queryClient, WORKBOOK_QUERY_KEY, optimisticEntry)
+
+      return { previousData }
+    },
+    onSuccess: (newEntry) => {
+      updateItemInCache(queryClient, WORKBOOK_QUERY_KEY, (entries) =>
+        (entries as any[]).map((e) => (e.$id?.startsWith('temp-') ? newEntry : e)),
+      )
+    },
+    onError: (error, _input, context: any) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(WORKBOOK_QUERY_KEY, context.previousData)
+      }
+      console.error('Error creating workbook entry:', error)
+    },
   })
 
   const updateEntry = useMutation({
     mutationFn: ({ id, input }: { id: string; input: Partial<WorkbookEntryInput> }) =>
       workbookService.updateEntry(id, input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: WORKBOOK_QUERY_KEY }),
+    onMutate: async ({ id, input }) => {
+      await queryClient.cancelQueries({ queryKey: WORKBOOK_QUERY_KEY })
+      const previousData = queryClient.getQueryData(WORKBOOK_QUERY_KEY)
+
+      updateItemInCache(queryClient, WORKBOOK_QUERY_KEY, (entries) =>
+        (entries as any[]).map((e) => (e.$id === id ? { ...e, ...input } : e)),
+      )
+
+      return { previousData }
+    },
+    onError: (error, _input, context: any) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(WORKBOOK_QUERY_KEY, context.previousData)
+      }
+      console.error('Error updating workbook entry:', error)
+    },
   })
 
   const deleteEntry = useMutation({
     mutationFn: (id: string) => workbookService.deleteEntry(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: WORKBOOK_QUERY_KEY }),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: WORKBOOK_QUERY_KEY })
+      const previousData = queryClient.getQueryData(WORKBOOK_QUERY_KEY)
+
+      removeItemFromCache(queryClient, WORKBOOK_QUERY_KEY, id)
+
+      return { previousData }
+    },
+    onError: (error, _input, context: any) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(WORKBOOK_QUERY_KEY, context.previousData)
+      }
+      console.error('Error deleting workbook entry:', error)
+    },
   })
 
   return {

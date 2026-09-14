@@ -22,7 +22,22 @@ client.ping().catch((error: unknown) => {
   console.error('Appwrite ping failed during app bootstrap.', error)
 })
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes - prevent auto-refetch
+      gcTime: 10 * 60 * 1000, // 10 minutes - keep inactive data
+      retry: 1, // Retry failed queries once
+      networkMode: 'always', // Request even if offline
+      refetchOnWindowFocus: false, // Don't refetch on window focus
+      refetchOnReconnect: true, // Refetch when reconnecting
+    },
+    mutations: {
+      networkMode: 'always', // Send mutations even if offline
+      retry: 1, // Retry failed mutations once
+    },
+  },
+})
 
 const rootElement = document.getElementById('root')
 
