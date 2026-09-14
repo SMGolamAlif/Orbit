@@ -159,14 +159,21 @@ function CountdownCard() {
   const [endTime, setEndTime] = useState<number | null>(null)
   const [remaining, setRemaining] = useState<number | null>(null)
   const [done, setDone] = useState(false)
+  const endTimeRef = useRef<number | null>(null)
 
   useEffect(() => {
-    if (endTime === null) return undefined
+    endTimeRef.current = endTime
+  }, [endTime])
+
+  useEffect(() => {
+    if (endTimeRef.current === null) return undefined
 
     let raf: number
     function tick() {
       const now = Date.now()
-      const left = Math.max(0, endTime! - now)
+      const end = endTimeRef.current
+      if (end === null) return
+      const left = Math.max(0, end - now)
       setRemaining(left)
       if (left <= 0) {
         setDone(true)
@@ -178,17 +185,23 @@ function CountdownCard() {
     raf = requestAnimationFrame(tick)
 
     return () => cancelAnimationFrame(raf)
-  }, [endTime])
+  }, [])
 
   const running = remaining !== null && remaining > 0
+  const formatDisplay = (ms: number) => {
+    const mm = Math.floor(ms / 60000)
+      .toString()
+      .padStart(2, '0')
+    const ss = Math.floor((ms % 60000) / 1000)
+      .toString()
+      .padStart(2, '0')
+    const ms_val = (ms % 1000).toString().padStart(3, '0')
+    return `${mm}:${ss}.${ms_val}`
+  }
   const display =
     remaining !== null
-      ? `${Math.floor(remaining / 60000)
-          .toString()
-          .padStart(2, '0')}:${Math.floor((remaining % 60000) / 1000)
-          .toString()
-          .padStart(2, '0')}.${(remaining % 1000).toString().padStart(3, '0')}`
-      : '--:--.---'
+      ? formatDisplay(remaining)
+      : formatDisplay(inputMinutes * 60 * 1000)
 
   return (
     <GlassCard className="space-y-4 p-5">

@@ -116,6 +116,13 @@ function AlarmProvider({ children }: { children: ReactNode }) {
 
   const ringingAlarm = alarms.find((a) => a.id === ringingId) ?? null
 
+  // Request notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().catch(() => {})
+    }
+  }, [])
+
   // Persist alarms to localStorage on every change
   useEffect(() => {
     saveAlarms(alarms)
@@ -135,6 +142,18 @@ function AlarmProvider({ children }: { children: ReactNode }) {
             firedRef.current.add(alarm.id)
             setRingingId(alarm.id)
             stopAlarmRef.current = playAlarmChime()
+            // Show browser notification
+            if ('Notification' in window && Notification.permission === 'granted') {
+              try {
+                new Notification('Alarm: ' + (alarm.title || alarm.time), {
+                  body: alarm.title ? alarm.time : 'Your alarm is ringing',
+                  icon: '/favicon.ico',
+                  badge: '/favicon.ico',
+                  tag: alarm.id,
+                  requireInteraction: true,
+                })
+              } catch {}
+            }
             break // only one rings at a time
           }
         } else {

@@ -1,8 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Activity, Bell, LogOut, Moon, Settings, Sun, User } from 'lucide-react'
+import {
+  Activity,
+  AlarmClock,
+  Bell,
+  LogOut,
+  Moon,
+  Settings,
+  Sun,
+  User,
+  X,
+} from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useTheme } from '@/hooks/useTheme'
+import { useAlarm } from '@/hooks/useAlarm'
 import { useTasks } from '@/hooks/useTasks'
 
 function getGreeting(date: Date) {
@@ -29,6 +40,7 @@ function Topbar() {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const { tasks } = useTasks()
+  const { ringingId, ringingAlarm, dismiss } = useAlarm()
   const navigate = useNavigate()
   const greeting = getGreeting(new Date())
   const firstName = user?.name?.split(' ')[0] ?? 'there'
@@ -49,7 +61,8 @@ function Topbar() {
   const incompleteTasks = tasks.filter((task) => task.status !== 'done')
   const overdueTasks = incompleteTasks.filter((task) => isOverdue(task.dueDate))
   const dueTodayTasks = incompleteTasks.filter((task) => isDueToday(task.dueDate))
-  const notificationCount = overdueTasks.length + dueTodayTasks.length
+  const notificationCount =
+    overdueTasks.length + dueTodayTasks.length + (ringingId ? 1 : 0)
 
   async function handleLogout() {
     await logout()
@@ -119,6 +132,42 @@ function Topbar() {
                 </p>
               ) : (
                 <ul className="space-y-1.5">
+                  {ringingId && ringingAlarm && (
+                    <li className="rounded-control bg-primary/10 px-2.5 py-2 text-sm text-ink">
+                      <div className="flex items-center justify-between gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigate('/app/clock')
+                            setOpenMenu(null)
+                          }}
+                          className="flex flex-1 items-center gap-2 transition-opacity hover:opacity-80"
+                        >
+                          <AlarmClock
+                            className="h-4 w-4 animate-pulse text-primary shrink-0"
+                            strokeWidth={2}
+                          />
+                          <span className="text-left">
+                            <span className="font-medium text-primary">
+                              Alarm ringing:
+                            </span>{' '}
+                            {ringingAlarm.title || ringingAlarm.time}
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            dismiss()
+                          }}
+                          className="rounded p-1 text-primary/60 transition-colors hover:text-primary shrink-0"
+                          aria-label="Dismiss alarm"
+                        >
+                          <X className="h-4 w-4" strokeWidth={2} />
+                        </button>
+                      </div>
+                    </li>
+                  )}
                   {overdueTasks.slice(0, 3).map((task) => (
                     <li
                       key={task.$id}
