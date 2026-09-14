@@ -20,17 +20,28 @@ function useCategories() {
     queryKey: ['categories', user?.$id],
     queryFn: async () => {
       if (!user) return []
-      const userCategories = await categoryService.listCategories(user.$id)
-      const customNames = new Set(userCategories.map((c) => c.name))
-      const defaults = DEFAULT_CATEGORIES.filter((d) => !customNames.has(d.name)).map(
-        (d) => ({
+      try {
+        const userCategories = await categoryService.listCategories(user.$id)
+        const customNames = new Set(userCategories.map((c) => c.name))
+        const defaults = DEFAULT_CATEGORIES.filter((d) => !customNames.has(d.name)).map(
+          (d) => ({
+            $id: d.name.toLowerCase(),
+            $createdAt: '',
+            userId: user.$id,
+            ...d,
+          }),
+        )
+        return [...defaults, ...userCategories]
+      } catch (err) {
+        console.error('Error loading categories:', err)
+        // Return defaults if loading fails (collection might not exist yet)
+        return DEFAULT_CATEGORIES.map((d) => ({
           $id: d.name.toLowerCase(),
           $createdAt: '',
           userId: user.$id,
           ...d,
-        }),
-      )
-      return [...defaults, ...userCategories]
+        }))
+      }
     },
     enabled: !!user,
   })
@@ -38,7 +49,14 @@ function useCategories() {
   const createCategoryMutation = useMutation({
     mutationFn: async (input: CategoryInput) => {
       if (!user) throw new Error('User not authenticated')
-      return categoryService.createCategory(user.$id, input)
+      try {
+        const result = await categoryService.createCategory(user.$id, input)
+        console.log('Category created:', result)
+        return result
+      } catch (err) {
+        console.error('Error creating category:', err)
+        throw err
+      }
     },
     onMutate: async (newCategory) => {
       await queryClient.cancelQueries({ queryKey: ['categories', user?.$id] })
@@ -57,7 +75,8 @@ function useCategories() {
       })
       return { previousCategories }
     },
-    onError: (_err, _newCategory, context) => {
+    onError: (err, _newCategory, context) => {
+      console.error('Mutation error:', err)
       if (context?.previousCategories) {
         queryClient.setQueryData(['categories', user?.$id], context.previousCategories)
       }

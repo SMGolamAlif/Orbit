@@ -11,15 +11,6 @@ import type { TaskPriority } from '@/types/task'
 
 type FilterKey = 'all' | 'today' | 'overdue' | 'high' | 'completed'
 
-const DEFAULT_CATEGORIES = [
-  { name: 'Work', isCustom: false, color: 'primary' },
-  { name: 'Health', isCustom: false, color: 'success' },
-  { name: 'Growth', isCustom: false, color: 'default' },
-  { name: 'Mind', isCustom: false, color: 'warning' },
-  { name: 'Personal', isCustom: false, color: 'danger' },
-  { name: 'Study', isCustom: false, color: 'primary' },
-]
-
 const FILTERS: { key: FilterKey; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'today', label: 'Due Today' },
@@ -127,17 +118,11 @@ function Tasks() {
               }}
               className="rounded-control border border-glass-border bg-tint/5 px-3 py-2.5 text-sm text-ink outline-none focus:border-primary"
             >
-              {categories.length === 0
-                ? DEFAULT_CATEGORIES.map((cat) => (
-                    <option key={cat.name} value={cat.name} className="bg-surface">
-                      {cat.name}
-                    </option>
-                  ))
-                : categories.map((cat) => (
-                    <option key={cat.$id} value={cat.name} className="bg-surface">
-                      {cat.name}
-                    </option>
-                  ))}
+              {categories.map((cat) => (
+                <option key={cat.$id || cat.name} value={cat.name} className="bg-surface">
+                  {cat.name}
+                </option>
+              ))}
             </select>
             <div className="relative">
               <Button
