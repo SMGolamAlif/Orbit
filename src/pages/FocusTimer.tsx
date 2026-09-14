@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Pause, Play, RotateCcw, Volume2, VolumeX } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Pause, Play, RotateCcw, Volume2, VolumeX, Maximize } from 'lucide-react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { ProgressRing } from '@/components/ui/progress-ring'
 import { useAuth } from '@/hooks/useAuth'
@@ -71,6 +72,7 @@ function useAmbientNoise(enabled: boolean) {
 }
 
 function FocusTimer() {
+  const navigate = useNavigate()
   const { user, profile } = useAuth()
   const {
     mode,
@@ -142,6 +144,16 @@ function FocusTimer() {
             Break
           </button>
         </div>
+
+        <button
+          type="button"
+          onClick={() => navigate('/app/ultra-focus')}
+          className="w-full flex items-center justify-center gap-2 rounded-control border border-primary/30 bg-gradient-to-r from-primary/10 to-secondary/10 px-4 py-3 text-sm font-medium text-primary transition-all hover:border-primary/50 hover:bg-gradient-to-r hover:from-primary/15 hover:to-secondary/15"
+          aria-label="Enter ultra focus mode"
+        >
+          <Maximize className="h-4 w-4" strokeWidth={2} />
+          Ultra Focus Mode
+        </button>
 
         <ProgressRing progress={progress} size={260} strokeWidth={14}>
           <div className="text-center">

@@ -4,6 +4,7 @@ import ProtectedRoute from '@/components/ProtectedRoute'
 import Clock from '@/pages/Clock'
 import Dashboard from '@/pages/Dashboard'
 import FocusTimer from '@/pages/FocusTimer'
+import { UltraFocusTimer } from '@/pages/UltraFocusTimer'
 import Habits from '@/pages/Habits'
 import Insights from '@/pages/Insights'
 import Kanban from '@/pages/Kanban'
@@ -55,6 +56,7 @@ function App() {
         <Route path="/app/notes" element={<Notes />} />
         <Route path="/app/workbook" element={<Workbook />} />
         <Route path="/app/focus-timer" element={<FocusTimer />} />
+        <Route path="/app/ultra-focus" element={<UltraFocusTimer />} />
         <Route path="/app/clock" element={<Clock />} />
         <Route path="/app/insights" element={<Insights />} />
         <Route path="/app/habits" element={<Habits />} />
