@@ -6,6 +6,15 @@
 
 **Orbit** is a personal time-management and life-tracking dashboard built with React, TypeScript, and Appwrite. It helps you visualize your life in weeks, stay focused with a Pomodoro-style timer, manage tasks & notes, and gain insights into how you spend your most valuable resource — time.
 
+## Routes
+
+- `/` is the public Orbit landing page.
+- `/login` and `/register` are public authentication screens.
+- `/onboarding` is available to signed-in users completing their profile.
+- `/app` and `/app/*` contain the protected Orbit workspace.
+
+Unauthenticated visits to a protected route redirect to login and return to the originally requested page after a successful sign-in.
+
 ### ✨ Features
 
 - **Life Calendar** — See your entire life in weeks. A powerful, humbling visualization inspired by _Your Life in Weeks_.
@@ -49,7 +58,13 @@ VITE_APPWRITE_DATABASE_ID=your_database_id
 VITE_APPWRITE_BUCKET_ID=your_bucket_id
 ```
 
-Also add your local Vite URL (usually `http://localhost:5173`) to Appwrite platform settings.
+Add `http://localhost:5173` and your production origin, such as `https://yourdomain.com`, to Appwrite project Platform settings.
+
+## Deployment
+
+Use one domain initially: host the landing page and authentication at `yourdomain.com`, with the signed-in app at `yourdomain.com/app/*`. Configure the hosting provider with an SPA fallback that rewrites every route, including `/app/habits`, to `index.html`; otherwise direct visits to nested routes will return a 404.
+
+An `app.yourdomain.com` split can be introduced later if marketing and app deployments need separate ownership. Add every allowed development and production origin to Appwrite when that happens.
 
 ## 3) Run
 

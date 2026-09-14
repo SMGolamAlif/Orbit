@@ -20,7 +20,7 @@ function Register() {
 
     try {
       await register(name, email, password)
-      navigate('/', { replace: true })
+      navigate('/onboarding', { replace: true })
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'Unable to register.')
     } finally {
@@ -35,8 +35,12 @@ function Register() {
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary font-heading text-sm font-semibold text-white">
             O
           </div>
-          <h1 className="mt-4 font-heading text-2xl font-semibold text-ink">Create your account</h1>
-          <p className="mt-1 text-sm text-ink-secondary">Start visualizing your life in weeks.</p>
+          <h1 className="mt-4 font-heading text-2xl font-semibold text-ink">
+            Create your account
+          </h1>
+          <p className="mt-1 text-sm text-ink-secondary">
+            Start visualizing your life in weeks.
+          </p>
         </div>
 
         <form className="space-y-4" onSubmit={onSubmit}>
@@ -84,7 +88,10 @@ function Register() {
 
         <p className="text-center text-sm text-ink-secondary">
           Already have an account?{' '}
-          <Link to="/login" className="font-medium text-primary transition-colors hover:text-highlight hover:underline">
+          <Link
+            to="/login"
+            className="font-medium text-primary transition-colors hover:text-highlight hover:underline"
+          >
             Log in
           </Link>
         </p>

@@ -26,7 +26,7 @@ function QuickNotesCard() {
       <div className="flex items-center justify-between">
         <h2 className="font-heading text-base font-semibold text-ink">Quick Notes</h2>
         <Link
-          to="/notes"
+          to="/app/notes"
           aria-label="Add note"
           className="flex h-7 w-7 items-center justify-center rounded-full border border-glass-border text-ink-secondary transition-colors hover:text-primary"
         >
@@ -38,7 +38,7 @@ function QuickNotesCard() {
         <p className="text-sm text-ink-secondary">Loading notes...</p>
       ) : preview.length === 0 ? (
         <Link
-          to="/notes"
+          to="/app/notes"
           className="block rounded-control border border-dashed border-glass-border p-3 text-center text-sm text-ink-secondary transition-colors hover:border-primary hover:text-primary"
         >
           No notes yet — add your first one
@@ -48,7 +48,7 @@ function QuickNotesCard() {
           {preview.map((note) => (
             <li key={note.$id}>
               <Link
-                to="/notes"
+                to="/app/notes"
                 className="block rounded-control border border-glass-border bg-tint/5 p-3 transition-colors hover:border-primary"
               >
                 <div className="flex items-center gap-2">

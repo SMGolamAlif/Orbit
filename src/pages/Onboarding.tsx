@@ -3,7 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { GlassCard } from '@/components/ui/glass-card'
 import { useAuth } from '@/hooks/useAuth'
-import { DEFAULT_LIFE_EXPECTANCY, LIFE_EXPECTANCY_BY_COUNTRY, estimateLifeExpectancy } from '@/lib/life-expectancy'
+import {
+  DEFAULT_LIFE_EXPECTANCY,
+  LIFE_EXPECTANCY_BY_COUNTRY,
+  estimateLifeExpectancy,
+} from '@/lib/life-expectancy'
 import { profileService } from '@/services/profile'
 
 const COUNTRIES = Object.keys(LIFE_EXPECTANCY_BY_COUNTRY).sort()
@@ -40,9 +44,13 @@ function Onboarding() {
         lifeExpectancyYears,
       })
       await refreshProfile()
-      navigate('/', { replace: true })
+      navigate('/app', { replace: true })
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'Unable to save your profile.')
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : 'Unable to save your profile.',
+      )
     } finally {
       setSubmitting(false)
     }
@@ -52,13 +60,15 @@ function Onboarding() {
     <div className="flex min-h-screen items-center justify-center bg-bg px-4 py-10">
       <GlassCard className="w-full max-w-lg space-y-6 p-8">
         <div>
-          <p className="text-sm font-medium uppercase tracking-wide text-primary">Personalize Orbit</p>
+          <p className="text-sm font-medium uppercase tracking-wide text-primary">
+            Personalize Orbit
+          </p>
           <h1 className="mt-2 font-heading text-2xl font-semibold text-ink">
             Let&apos;s set up your Life Calendar
           </h1>
           <p className="mt-1 text-sm text-ink-secondary">
-            This helps us visualize how much life you&apos;ve lived and how much remains. You can change
-            this anytime in Settings.
+            This helps us visualize how much life you&apos;ve lived and how much remains.
+            You can change this anytime in Settings.
           </p>
         </div>
 
@@ -94,7 +104,9 @@ function Onboarding() {
           </label>
 
           <label className="block text-sm">
-            <span className="mb-1.5 block text-ink-secondary">Expected lifespan (years)</span>
+            <span className="mb-1.5 block text-ink-secondary">
+              Expected lifespan (years)
+            </span>
             <input
               type="number"
               min={1}

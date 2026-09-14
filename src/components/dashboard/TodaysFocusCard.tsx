@@ -77,7 +77,7 @@ function TodaysFocusCard() {
       )}
 
       <Link
-        to="/tasks"
+        to="/app/tasks"
         className="flex w-full items-center gap-2 rounded-control border border-dashed border-glass-border px-3 py-2 text-sm text-ink-secondary transition-colors hover:border-primary hover:text-primary"
       >
         <Plus className="h-4 w-4" strokeWidth={2} />

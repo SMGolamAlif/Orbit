@@ -43,7 +43,10 @@ function Dashboard() {
       </div>
 
       <div className="flex h-full min-h-0 flex-col gap-6 overflow-y-auto pr-1">
-        <LifeOverviewCard stats={stats} onOpenInsights={() => navigate('/insights')} />
+        <LifeOverviewCard
+          stats={stats}
+          onOpenInsights={() => navigate('/app/insights')}
+        />
         <TodaysFocusCard />
         <HabitsCard />
         <QuoteCard />

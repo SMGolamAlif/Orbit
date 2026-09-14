@@ -17,17 +17,17 @@ import { ProgressRing } from '@/components/ui/progress-ring'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/life-calendar', label: 'Life Calendar', icon: CalendarRange, end: false },
-  { to: '/tasks', label: 'Tasks', icon: CheckSquare, end: false },
-  { to: '/kanban', label: 'Kanban', icon: Kanban, end: false },
-  { to: '/notes', label: 'Notes', icon: NotebookPen, end: false },
-  { to: '/workbook', label: 'Workbook', icon: BookOpen, end: false },
-  { to: '/focus-timer', label: 'Focus Timer', icon: Timer, end: false },
-  { to: '/clock', label: 'Clock', icon: Clock, end: false },
-  { to: '/insights', label: 'Insights', icon: LineChart, end: false },
-  { to: '/habits', label: 'Habits', icon: ListChecks, end: false },
-  { to: '/settings', label: 'Settings', icon: Settings, end: false },
+  { to: '/app', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/app/life-calendar', label: 'Life Calendar', icon: CalendarRange, end: false },
+  { to: '/app/tasks', label: 'Tasks', icon: CheckSquare, end: false },
+  { to: '/app/kanban', label: 'Kanban', icon: Kanban, end: false },
+  { to: '/app/notes', label: 'Notes', icon: NotebookPen, end: false },
+  { to: '/app/workbook', label: 'Workbook', icon: BookOpen, end: false },
+  { to: '/app/focus-timer', label: 'Focus Timer', icon: Timer, end: false },
+  { to: '/app/clock', label: 'Clock', icon: Clock, end: false },
+  { to: '/app/insights', label: 'Insights', icon: LineChart, end: false },
+  { to: '/app/habits', label: 'Habits', icon: ListChecks, end: false },
+  { to: '/app/settings', label: 'Settings', icon: Settings, end: false },
 ]
 
 interface SidebarProps {

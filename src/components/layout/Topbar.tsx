@@ -84,7 +84,7 @@ function Topbar() {
         </button>
 
         <Link
-          to="/insights"
+          to="/app/insights"
           aria-label="Insights"
           className="flex h-10 w-10 items-center justify-center rounded-full border border-glass-border bg-tint/5 text-ink-secondary transition-colors hover:text-primary"
         >
@@ -95,7 +95,11 @@ function Topbar() {
           <button
             type="button"
             aria-label="Notifications"
-            onClick={() => setOpenMenu((current) => (current === 'notifications' ? null : 'notifications'))}
+            onClick={() =>
+              setOpenMenu((current) =>
+                current === 'notifications' ? null : 'notifications',
+              )
+            }
             className="relative flex h-10 w-10 items-center justify-center rounded-full border border-glass-border bg-tint/5 text-ink-secondary transition-colors hover:text-primary"
           >
             <Bell className="h-[18px] w-[18px]" strokeWidth={2} />
@@ -106,25 +110,37 @@ function Topbar() {
 
           {openMenu === 'notifications' ? (
             <div className="absolute right-0 top-12 z-20 w-72 rounded-card border border-glass-border bg-surface p-3 shadow-glass">
-              <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">Notifications</p>
+              <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
+                Notifications
+              </p>
               {notificationCount === 0 ? (
-                <p className="px-1 py-2 text-sm text-ink-secondary">You&apos;re all caught up. Nothing needs attention.</p>
+                <p className="px-1 py-2 text-sm text-ink-secondary">
+                  You&apos;re all caught up. Nothing needs attention.
+                </p>
               ) : (
                 <ul className="space-y-1.5">
                   {overdueTasks.slice(0, 3).map((task) => (
-                    <li key={task.$id} className="rounded-control bg-danger/10 px-2.5 py-2 text-sm text-ink">
-                      <span className="font-medium text-danger">Overdue:</span> {task.title}
+                    <li
+                      key={task.$id}
+                      className="rounded-control bg-danger/10 px-2.5 py-2 text-sm text-ink"
+                    >
+                      <span className="font-medium text-danger">Overdue:</span>{' '}
+                      {task.title}
                     </li>
                   ))}
                   {dueTodayTasks.slice(0, 3).map((task) => (
-                    <li key={task.$id} className="rounded-control bg-warning/10 px-2.5 py-2 text-sm text-ink">
-                      <span className="font-medium text-warning">Due today:</span> {task.title}
+                    <li
+                      key={task.$id}
+                      className="rounded-control bg-warning/10 px-2.5 py-2 text-sm text-ink"
+                    >
+                      <span className="font-medium text-warning">Due today:</span>{' '}
+                      {task.title}
                     </li>
                   ))}
                 </ul>
               )}
               <Link
-                to="/tasks"
+                to="/app/tasks"
                 onClick={() => setOpenMenu(null)}
                 className="mt-2 block rounded-control px-2.5 py-2 text-center text-sm text-primary hover:bg-tint/10"
               >
@@ -137,20 +153,24 @@ function Topbar() {
         <div className="relative">
           <button
             type="button"
-            onClick={() => setOpenMenu((current) => (current === 'profile' ? null : 'profile'))}
+            onClick={() =>
+              setOpenMenu((current) => (current === 'profile' ? null : 'profile'))
+            }
             className="flex items-center gap-2 rounded-full border border-glass-border bg-tint/5 py-1.5 pl-1.5 pr-3"
           >
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-xs font-semibold text-white">
               {firstName.charAt(0).toUpperCase()}
             </div>
-            <span className="text-sm font-medium text-ink">{user?.name ?? 'Account'}</span>
+            <span className="text-sm font-medium text-ink">
+              {user?.name ?? 'Account'}
+            </span>
           </button>
 
           {openMenu === 'profile' ? (
             <div className="absolute right-0 top-12 z-20 w-56 rounded-card border border-glass-border bg-surface p-2 shadow-glass">
               <p className="truncate px-2.5 py-1.5 text-xs text-muted">{user?.email}</p>
               <Link
-                to="/settings"
+                to="/app/settings"
                 onClick={() => setOpenMenu(null)}
                 className="flex items-center gap-2 rounded-control px-2.5 py-2 text-sm text-ink-secondary transition-colors hover:bg-tint/10 hover:text-ink"
               >
@@ -158,7 +178,7 @@ function Topbar() {
                 Settings
               </Link>
               <Link
-                to="/settings"
+                to="/app/settings"
                 onClick={() => setOpenMenu(null)}
                 className="flex items-center gap-2 rounded-control px-2.5 py-2 text-sm text-ink-secondary transition-colors hover:bg-tint/10 hover:text-ink"
               >
@@ -182,4 +202,3 @@ function Topbar() {
 }
 
 export { Topbar }
-

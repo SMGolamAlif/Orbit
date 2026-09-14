@@ -37,7 +37,7 @@ function HabitsCard() {
           />
           <p className="text-sm text-ink-secondary">No habits yet</p>
           <Link
-            to="/habits"
+            to="/app/habits"
             className="mt-2 inline-flex items-center gap-1 text-sm text-primary hover:underline"
           >
             Create your first habit <ChevronRight className="h-3 w-3" strokeWidth={2} />
@@ -101,7 +101,7 @@ function HabitsCard() {
       )}
 
       <Link
-        to="/habits"
+        to="/app/habits"
         className="flex w-full items-center gap-2 rounded-control border border-dashed border-glass-border px-3 py-2 text-sm text-ink-secondary transition-colors hover:border-primary hover:text-primary"
       >
         <Plus className="h-4 w-4" strokeWidth={2} />

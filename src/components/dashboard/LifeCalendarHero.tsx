@@ -82,12 +82,16 @@ function LifeCalendarHero({
 
       <div className="relative flex shrink-0 flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-sm font-medium uppercase tracking-wide text-primary">Your Life in Weeks</p>
+          <p className="text-sm font-medium uppercase tracking-wide text-primary">
+            Your Life in Weeks
+          </p>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="font-mono text-4xl font-bold text-ink md:text-5xl">
               {stats.weeksRemaining.toLocaleString()}
             </span>
-            <span className="font-heading text-xl text-ink-secondary md:text-2xl">weeks remaining</span>
+            <span className="font-heading text-xl text-ink-secondary md:text-2xl">
+              weeks remaining
+            </span>
           </div>
           <p className="mt-2 max-w-md text-sm italic text-ink-secondary">
             Live intentionally. You don&apos;t get this time back.
@@ -103,14 +107,18 @@ function LifeCalendarHero({
               Age {stats.ageYears.toFixed(1)} · {today}
             </p>
           </div>
-          <Button variant="secondary" size="sm" onClick={() => setYearView((current) => !current)}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setYearView((current) => !current)}
+          >
             {yearView ? 'Grid view' : 'Year view'}
           </Button>
           <Button
             variant="ghost"
             size="icon"
             aria-label="Life Calendar settings"
-            onClick={() => navigate('/settings')}
+            onClick={() => navigate('/app/settings')}
           >
             <Settings className="h-4 w-4" strokeWidth={2} />
           </Button>
@@ -121,7 +129,10 @@ function LifeCalendarHero({
         {yearView ? (
           <div
             className="grid shrink-0 text-right font-mono text-[9px] leading-none text-muted"
-            style={{ gridTemplateRows: `repeat(${totalYears}, minmax(0, 1fr))`, rowGap: `${ROW_GAP}px` }}
+            style={{
+              gridTemplateRows: `repeat(${totalYears}, minmax(0, 1fr))`,
+              rowGap: `${ROW_GAP}px`,
+            }}
           >
             {Array.from({ length: totalYears }, (_, rowIndex) => (
               <span key={rowIndex} className="flex items-center justify-end">
@@ -144,17 +155,22 @@ function LifeCalendarHero({
             {Array.from({ length: stats.totalWeeks }, (_, weekIndex) => {
               const isLived = weekIndex < stats.weeksLived
               const isCurrent = weekIndex === stats.currentWeekIndex
-              const color = isLived ? getWeekColor(weekIndex / Math.max(stats.weeksLived, 1), gradientStops) : undefined
+              const color = isLived
+                ? getWeekColor(weekIndex / Math.max(stats.weeksLived, 1), gradientStops)
+                : undefined
 
               return (
                 <div
                   key={weekIndex}
                   onMouseEnter={() => setHoveredWeek(weekIndex)}
-                  onMouseLeave={() => setHoveredWeek((current) => (current === weekIndex ? null : current))}
+                  onMouseLeave={() =>
+                    setHoveredWeek((current) => (current === weekIndex ? null : current))
+                  }
                   className={cn(
                     'relative rounded-[1px] border border-tint/5 transition-colors duration-100 hover:z-20 hover:border-primary hover:shadow-[0_0_0_1px_rgb(var(--color-primary)/0.8)]',
                     !isLived && 'bg-tint/[0.04]',
-                    isCurrent && 'animate-pulse ring-2 ring-primary ring-offset-1 ring-offset-surface',
+                    isCurrent &&
+                      'animate-pulse ring-2 ring-primary ring-offset-1 ring-offset-surface',
                   )}
                   style={{ backgroundColor: color }}
                 />

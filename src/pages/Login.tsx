@@ -13,7 +13,8 @@ function Login() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const redirectTo = (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? '/'
+  const redirectTo =
+    (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? '/app'
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -37,8 +38,12 @@ function Login() {
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary font-heading text-sm font-semibold text-white">
             O
           </div>
-          <h1 className="mt-4 font-heading text-2xl font-semibold text-ink">Welcome back</h1>
-          <p className="mt-1 text-sm text-ink-secondary">Log in to continue visualizing your time.</p>
+          <h1 className="mt-4 font-heading text-2xl font-semibold text-ink">
+            Welcome back
+          </h1>
+          <p className="mt-1 text-sm text-ink-secondary">
+            Log in to continue visualizing your time.
+          </p>
         </div>
 
         <form className="space-y-4" onSubmit={onSubmit}>
@@ -76,7 +81,10 @@ function Login() {
 
         <p className="text-center text-sm text-ink-secondary">
           No account yet?{' '}
-          <Link to="/register" className="font-medium text-primary transition-colors hover:text-highlight hover:underline">
+          <Link
+            to="/register"
+            className="font-medium text-primary transition-colors hover:text-highlight hover:underline"
+          >
             Register
           </Link>
         </p>
