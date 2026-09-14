@@ -82,12 +82,9 @@ function Tasks() {
         color: 'primary',
         isCustom: true,
       })
-      // Wait a moment for the categories query to update, then select the new category
-      setTimeout(() => {
-        setCategory(newName)
-        setNewCategoryName('')
-        setShowNewCategory(false)
-      }, 100)
+      setCategory(newName)
+      setNewCategoryName('')
+      setShowNewCategory(false)
     } catch (error) {
       console.error('Failed to create category:', error)
       setNewCategoryName('')

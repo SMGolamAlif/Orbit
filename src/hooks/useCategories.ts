@@ -62,8 +62,13 @@ function useCategories() {
         queryClient.setQueryData(['categories', user?.$id], context.previousCategories)
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories', user?.$id] })
+    onSuccess: (newCategory) => {
+      // Update cache with the real server response, replacing temp entries
+      queryClient.setQueryData(['categories', user?.$id], (old: any) => {
+        if (!old) return [newCategory]
+        // Remove any temp entries and add the real one
+        return [...old.filter((c: any) => !c.$id.startsWith('temp-')), newCategory]
+      })
     },
   })
 
@@ -84,8 +89,12 @@ function useCategories() {
         queryClient.setQueryData(['categories', user?.$id], context.previousCategories)
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories', user?.$id] })
+    onSuccess: (_, categoryId) => {
+      // Update cache to ensure the category is removed
+      queryClient.setQueryData(
+        ['categories', user?.$id],
+        (old: any) => old?.filter((c: any) => c.$id !== categoryId) || [],
+      )
     },
   })
 
