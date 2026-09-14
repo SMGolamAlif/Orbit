@@ -145,17 +145,7 @@ function useHabits() {
       targetCount: number
     }) => {
       if (!user) throw new Error('You must be logged in to update a habit')
-<<<<<<< HEAD
       return habitService.upsertHabitLog(user.$id, habitId, date, count, targetCount)
-=======
-      const habit = habitsQuery.data?.find((item) => item.$id === habitId)
-      return habitService.upsertHabitLog(
-        user.$id,
-        habitId,
-        date,
-        count >= (habit?.targetCount ?? 1),
-      )
->>>>>>> 6a438a6243141d4af6fa7731d7ef53159cc9ce64
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: HABIT_LOGS_QUERY_KEY }),
   })
@@ -179,7 +169,12 @@ function useHabits() {
   const toggleHabitToday = async (habit: Habit) => {
     const existingLog = todayLogs.find((l) => l.habitId === habit.$id)
     const newCount = existingLog?.completed ? 0 : habit.targetCount
-    await upsertHabitLog.mutateAsync({ habitId: habit.$id, date: today, count: newCount, targetCount: habit.targetCount })
+    await upsertHabitLog.mutateAsync({
+      habitId: habit.$id,
+      date: today,
+      count: newCount,
+      targetCount: habit.targetCount,
+    })
   }
 
   // Helper to get habit stats

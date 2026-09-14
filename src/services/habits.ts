@@ -87,7 +87,7 @@ const habitService = {
   async updateHabit(habitId: string, input: Partial<HabitInput>): Promise<Habit> {
     assertConfigured()
 
-    const { targetCount, order, ...data } = input
+    const { targetCount, ...data } = input
     const doc = await databases.updateDocument(
       APPWRITE_DATABASE_ID,
       APPWRITE_HABITS_COLLECTION_ID,
@@ -110,7 +110,8 @@ const habitService = {
     )
   },
 
-  async reorderHabits(_habits: Habit[]): Promise<void> {
+  async reorderHabits(habits: Habit[]): Promise<void> {
+    void habits
     // The deployed collection has no order attribute; creation time is the stable order.
   },
 
@@ -166,12 +167,8 @@ const habitService = {
     userId: string,
     habitId: string,
     date: string,
-<<<<<<< HEAD
     count: number,
     targetCount: number,
-=======
-    completed: boolean,
->>>>>>> 6a438a6243141d4af6fa7731d7ef53159cc9ce64
   ): Promise<HabitLog> {
     assertConfigured()
 
