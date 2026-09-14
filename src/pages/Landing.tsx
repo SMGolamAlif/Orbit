@@ -31,6 +31,7 @@ import { useTheme } from '@/hooks/useTheme'
 import { cn } from '@/lib/utils'
 import { ThreeBackground } from '@/components/ThreeBackground'
 import { FeatureSlidingCards } from '@/components/FeatureSlidingCards'
+import PublicFooter from '@/components/layout/PublicFooter'
 
 const FEATURE_CARDS = [
   {
@@ -603,75 +604,7 @@ function Landing() {
         </section>
       </main>
 
-      <footer className="relative isolate border-t border-primary/10 bg-bg">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_0%,rgb(var(--color-secondary)/0.04),transparent_60%)]" />
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
-          <div className="grid gap-10 md:grid-cols-4 md:gap-8">
-            <div className="md:col-span-2">
-              <Link to="/" className="inline-flex items-center gap-2.5">
-                <img src={orbitMark} alt="" className="h-8 w-8 object-contain" />
-                <span className="font-heading text-lg font-semibold text-ink">Orbit</span>
-              </Link>
-              <p className="mt-4 max-w-sm text-sm leading-6 text-ink-secondary">
-                A personal system for seeing your time and choosing it with care. Built
-                for return visits, not performative productivity.
-              </p>
-            </div>
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-ink-secondary mb-4">
-                Product
-              </div>
-              <ul className="space-y-3 text-sm text-ink-secondary">
-                <li>
-                  <a href="#features" className="transition-colors hover:text-ink">
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a href="#method" className="transition-colors hover:text-ink">
-                    How it works
-                  </a>
-                </li>
-                <li>
-                  <Link to="/app" className="transition-colors hover:text-ink">
-                    Open app
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-ink-secondary mb-4">
-                Account
-              </div>
-              <ul className="space-y-3 text-sm text-ink-secondary">
-                <li>
-                  <Link to="/login" className="transition-colors hover:text-ink">
-                    Log in
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/register" className="transition-colors hover:text-ink">
-                    Get started
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/onboarding" className="transition-colors hover:text-ink">
-                    Setup
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-10 border-t border-primary/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-ink-secondary">
-              © 2026 Orbit. All rights reserved.
-            </p>
-            <p className="text-xs text-ink-secondary">
-              Made with care for intentional living.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   )
 }

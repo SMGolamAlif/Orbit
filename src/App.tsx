@@ -16,6 +16,11 @@ import Register from '@/pages/Register'
 import Settings from '@/pages/Settings'
 import Tasks from '@/pages/Tasks'
 import Workbook from '@/pages/Workbook'
+import PrivacyPolicy from '@/pages/PrivacyPolicy'
+import TermsOfService from '@/pages/TermsOfService'
+import CookiePolicy from '@/pages/CookiePolicy'
+import Contact from '@/pages/Contact'
+import FAQ from '@/pages/FAQ'
 
 function App() {
   return (
@@ -23,6 +28,11 @@ function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsOfService />} />
+      <Route path="/cookies" element={<CookiePolicy />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/faq" element={<FAQ />} />
       <Route
         path="/onboarding"
         element={

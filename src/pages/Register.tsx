@@ -86,6 +86,27 @@ function Register() {
           </Button>
         </form>
 
+        <div className="text-center text-xs text-ink-secondary">
+          By creating an account, you agree to our{' '}
+          <a
+            href="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            Terms of Service
+          </a>{' '}
+          and{' '}
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            Privacy Policy
+          </a>
+        </div>
+
         <p className="text-center text-sm text-ink-secondary">
           Already have an account?{' '}
           <Link
